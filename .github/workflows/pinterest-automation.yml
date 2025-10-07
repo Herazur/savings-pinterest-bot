@@ -1,121 +1,440 @@
-name: Pinterest Otomatik Tasarruf Paylaşımı
+name: Advanced Pinterest Savings Automation
 
 on:
   schedule:
-    # Her gün saat 09:00'da (UTC)
-    - cron: '0 9 * * *'
-  
+    # Günde 2 kez - Optimal saatler
+    - cron: '0 9 * * *'    # 12:00 TR - Öğle
+    - cron: '0 15 * * *'   # 18:00 TR - Akşam
   workflow_dispatch:
-    inputs:
-      amount:
-        description: 'Tasarruf Miktarı (TRY)'
-        required: true
-        type: string
-      goal:
-        description: 'Hedef Adı'
-        required: true
-        type: string
-      percentage:
-        description: 'İlerleme Yüzdesi'
-        required: true
-        type: string
+  push:
+    branches: [ main, master ]
 
 jobs:
-  post-to-pinterest:
+  pinterest-savings:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Rastgele Görsel Seç
-        id: select_image
-        run: |
-          # Tasarruf görselleri için AI prompt'ları
-          declare -a prompts=(
-            "Modern minimalist piggy bank with gold coins, clean white background, professional 3D render, soft lighting, Pinterest aesthetic, vertical format"
-            "Elegant money jar filled with Turkish Lira bills, glass texture, bokeh background, luxury gold accents, motivational savings concept"
-            "Digital financial dashboard showing growth chart, purple and blue gradient, futuristic UI design, clean infographic style"
-            "Cute kawaii piggy bank character celebrating with confetti, pastel colors, happy savings milestone, chibi art style"
-            "Stack of gold coins growing upward like stairs, success journey metaphor, warm lighting, inspirational wealth building"
-            "Modern smartphone showing savings app with rising graph, hands holding phone, lifestyle shot, bright colors"
-            "Minimalist target goal with arrow hitting bullseye, gold and white theme, achievement concept, clean vector style"
-            "Treasure chest overflowing with coins and gems, fantasy style with realistic rendering, wealth abundance theme"
-            "Abstract geometric money tree growing upward, modern art style, teal and gold palette, financial growth metaphor"
-            "Calculator and coins on marble desk, top view flat lay, aesthetic workspace, professional finance vibes"
-            "Glass jar with \"Dreams\" label filled with coins, fairy lights background, cozy aesthetic, goal saving concept"
-            "Futuristic holographic piggy bank projection, neon lights, cyberpunk aesthetic, tech-savvy savings theme"
-            "Watercolor illustration of hands planting money tree, soft pastel colors, nurturing wealth concept, artistic style"
-            "3D isometric financial building blocks stacking up, colorful geometric shapes, progress visualization"
-            "Luxury gold safe with digital lock showing percentage, premium metallic finish, security and wealth theme"
-            "Cute animal characters (fox, rabbit, bear) saving coins together, children's book illustration style, teamwork"
-            "Money origami crane flying upward with coin trail, artistic paper craft, freedom through savings metaphor"
-            "Modern line art illustration of savings journey path, milestone markers, minimalist black and gold design"
-            "Vintage brass piggy bank on wooden shelf with plants, aesthetic home decor, Instagram-worthy savings setup"
-            "Digital cryptocurrency wallet interface with Turkish Lira symbol, blockchain aesthetic, modern fintech design"
-          )
-          
-          # Rastgele prompt seç
-          RANDOM_INDEX=$((RANDOM % ${#prompts[@]}))
-          SELECTED_PROMPT="${prompts[$RANDOM_INDEX]}"
-          
-          echo "Selected prompt: $SELECTED_PROMPT"
-          echo "prompt=$SELECTED_PROMPT" >> $GITHUB_OUTPUT
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Dependencies
+      run: |
+        pip install requests
+    
+    - name: Generate & Post Premium Savings Content
+      env:
+        IFTTT_KEY: dpnyddbPNFiOv6CVml5Lkc
+        WEBSITE_URL: https://yourwebsite.com
+      run: |
+        python << 'EOF'
+        import requests
+        import random
+        import os
+        import json
+        from datetime import datetime
+        import urllib.parse
+        import hashlib
 
-      - name: Görsel URL Oluştur
-        id: generate_image
-        run: |
-          PROMPT="${{ steps.select_image.outputs.prompt }}"
-          ENCODED_PROMPT=$(echo "$PROMPT" | jq -sRr @uri)
-          IMAGE_URL="https://image.pollinations.ai/prompt/${ENCODED_PROMPT}?width=1000&height=1500&nologo=true&model=flux&seed=$RANDOM"
-          
-          echo "Generated image URL: $IMAGE_URL"
-          echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
+        # ============================================
+        # GELİŞMİŞ TASARRUF PROMPT HAVUZU
+        # ============================================
+        
+        content_library = {
+            "piggy_bank_cute": {
+                "scenes": [
+                    "adorable pink ceramic piggy bank with gold coins scattered around, cozy home setting",
+                    "cute pastel colored piggy bank on wooden desk with Turkish Lira bills, aesthetic flat lay",
+                    "kawaii style piggy bank character with happy face, surrounded by shiny coins",
+                    "minimalist white piggy bank on marble surface, modern clean aesthetic",
+                    "vintage brass piggy bank with patina, nostalgic savings concept",
+                    "transparent glass piggy bank filled with colorful coins, see-through savings",
+                    "modern geometric piggy bank design in metallic gold, luxury savings concept",
+                    "handmade ceramic piggy bank with floral patterns, artisan craft aesthetic"
+                ],
+                "titles": [
+                    "💰 Her Gün Biraz Daha Zenginleş",
+                    "🎯 Hedefine Ulaşmanın Sırrı",
+                    "✨ Küçük Adımlar, Büyük Başarılar",
+                    "🌟 Tasarruf Yolculuğuna Başla",
+                    "💎 Hayallerini Gerçeğe Dönüştür",
+                    "🏆 Finansal Özgürlük Rehberin",
+                    "💝 Geleceğin İçin Bugün Biriktir",
+                    "🚀 Başarı Hikayeni Burada Başlıyor"
+                ]
+            },
+            
+            "money_growth": {
+                "scenes": [
+                    "stack of gold coins growing like stairs towards the sky, success journey metaphor",
+                    "Turkish Lira bills arranged in ascending order, wealth building visualization",
+                    "plant growing from pile of coins, money tree concept, nature meets finance",
+                    "rising graph made of coins and bills, financial growth illustration",
+                    "golden coins flowing upward in spiral, abundance and prosperity",
+                    "savings jar filling up with coins progressively, step by step growth",
+                    "calculator and growing coin stacks on desk, financial planning aesthetic",
+                    "hands carefully stacking coins higher, patient wealth building"
+                ],
+                "titles": [
+                    "📈 Her Ay Büyüyen Birikimin",
+                    "💪 Kararlılık + Disiplin = Başarı",
+                    "🎉 Hedefine %50 Daha Yaklaştın",
+                    "⏰ Zamanla Büyüyen Servetin",
+                    "🌱 Para Ağacını Bugün Dik",
+                    "📊 İstatistikler Yalan Söylemez",
+                    "🔥 Momentum Kaybetme, Devam Et",
+                    "💯 Tutarlılık Anahtarı Gösterecek"
+                ]
+            },
+            
+            "goal_achievement": {
+                "scenes": [
+                    "golden target with arrow hitting bullseye, achievement and goal success",
+                    "milestone markers along path with coins, journey to financial goal",
+                    "trophy filled with gold coins, victory in savings challenge",
+                    "checklist with golden checkmarks and coins, completed savings goals",
+                    "mountain peak made of coins with flag on top, summit of success",
+                    "keys to new car/house with coins around, dream achievement visualization",
+                    "calendar marked with savings milestones, time-based goal tracking",
+                    "progress bar filling up with gold, visual goal completion"
+                ],
+                "titles": [
+                    "🎯 Araba Hayalin Gerçek Oluyor",
+                    "🏠 Ev Sahibi Olmanın İlk Adımı",
+                    "✈️ Seyahat Fonun Hazır",
+                    "💍 Düğün Bütçen Tamamlanıyor",
+                    "📚 Eğitim Yatırımın Başladı",
+                    "🎓 Çocuklarının Geleceği Güvende",
+                    "🚗 Hayalindeki Araca Kavuşuyorsun",
+                    "🌴 Tatil Fonu Doldu"
+                ]
+            },
+            
+            "motivational_quotes": {
+                "scenes": [
+                    "inspiring quote on minimalist background with subtle coin imagery",
+                    "motivational text overlay on gold gradient, elegant typography",
+                    "wisdom words with piggy bank silhouette, philosophical savings concept",
+                    "powerful quote with Turkish Lira symbol, financial motivation",
+                    "success mantra with coin rain effect, abundance mindset",
+                    "daily affirmation with golden frame, positive money mindset",
+                    "inspirational message with growing plant metaphor, patience pays",
+                    "encouraging words with sunrise and coins, new beginning energy"
+                ],
+                "titles": [
+                    "💭 'Bugün Biriktirdiğin, Yarının Özgürlüğü'",
+                    "🌟 'Küçük Paralar, Büyük Hayaller'",
+                    "✨ 'Disiplin Geçicidir, Sonuçlar Kalıcıdır'",
+                    "💪 'Sen Yapabilirsin, İstatistikler Yanında'",
+                    "🎯 'Hedef Koymak Kolay, Ulaşmak Disiplin İster'",
+                    "🔥 'Her ₺1 Sayar, Her Gün Önemli'",
+                    "🌈 'Sabır + Tutarlılık = Başarı'",
+                    "💎 'Bugünkü Fedakarlık, Yarının Konfor'"
+                ]
+            },
+            
+            "lifestyle_dreams": {
+                "scenes": [
+                    "vision board with dream house, car, travel destinations and coins",
+                    "luxury items (watch, car keys, house model) with savings concept",
+                    "family vacation photo memories with piggy bank, life goals",
+                    "peaceful retirement scene with financial security symbols",
+                    "modern minimalist home interior with wealth indicators",
+                    "business success celebration with financial freedom theme",
+                    "wedding planning items with savings tracker, life milestones",
+                    "education graduation cap with diploma and coins, investment in future"
+                ],
+                "titles": [
+                    "🏡 Hayalinizdeki Ev Yakında",
+                    "🚘 Yeni Araban Seni Bekliyor",
+                    "✈️ Dünya Turuna Çıkmaya Hazır mısın?",
+                    "💒 Rüya Gibi Düğün İçin Plan",
+                    "🎓 Eğitime Yatırım En Büyük Kazanç",
+                    "👨‍👩‍👧‍👦 Ailenin Geleceği Güvende",
+                    "🌅 Erken Emeklilik Artık Mümkün",
+                    "💼 Kendi İşinin Patronu Olacaksın"
+                ]
+            },
+            
+            "smart_strategies": {
+                "scenes": [
+                    "infographic style layout showing 52-week savings challenge",
+                    "monthly budget planner with coins and calculator, organization",
+                    "smartphone app showing savings tracker, modern digital finance",
+                    "envelope budgeting system with Turkish Lira, traditional method",
+                    "investment diversification chart with piggy bank, smart money",
+                    "automatic savings transfer illustration, passive income concept",
+                    "financial literacy books with coins, education and growth",
+                    "comparison chart showing savings growth over time, data visualization"
+                ],
+                "titles": [
+                    "📱 Otomatik Tasarruf Sistemi Kur",
+                    "💡 52 Hafta Challenge ile ₺13,780",
+                    "🧠 Akıllı Birikim Stratejileri",
+                    "📊 Bütçe Planı ile Hedefe Koş",
+                    "🎯 Küçük Tüyolar, Büyük Farklar",
+                    "💰 Günde ₺10 = Yılda ₺3,650",
+                    "🔐 Acil Durum Fonu Oluştur",
+                    "📈 Bileşik Faizin Gücü"
+                ]
+            }
+        }
 
-      - name: Caption Oluştur
-        id: create_caption
-        run: |
-          # Emoji dizileri
-          EMOJIS=("💰" "🎯" "💵" "📊" "✨" "🚀" "💎" "🌟" "🏆" "🎉")
-          RANDOM_EMOJI=${EMOJIS[$RANDOM % ${#EMOJIS[@]}]}
-          
-          AMOUNT="${{ github.event.inputs.amount || '20.00' }}"
-          GOAL="${{ github.event.inputs.goal || 'araba' }}"
-          PERCENTAGE="${{ github.event.inputs.percentage || '2' }}"
-          
-          CAPTION="${RANDOM_EMOJI} ${GOAL} hedefim için %${PERCENTAGE} ilerleme kaydettim!
+        # ============================================
+        # HEDEF KATEGORİLERİ
+        # ============================================
+        
+        popular_goals = {
+            "vehicles": ["araba", "otomobil", "motorsiklet", "bisiklet", "elektrikli scooter"],
+            "housing": ["ev", "daire", "villa", "arsa", "ev eşyası", "mobilya"],
+            "travel": ["tatil", "seyahat", "dünya turu", "yurt dışı", "balayı"],
+            "education": ["eğitim", "kurs", "dil öğrenimi", "üniversite", "yüksek lisans"],
+            "wedding": ["düğün", "nişan", "evlilik", "çeyiz"],
+            "technology": ["telefon", "laptop", "kamera", "oyun konsolu", "tablet"],
+            "investments": ["yatırım", "hisse senedi", "altın", "kripto", "girişim"],
+            "emergency": ["acil fon", "sağlık", "sigorta", "güvenlik", "yedek para"]
+        }
+        
+        all_goals = [goal for category in popular_goals.values() for goal in category]
 
-📈 Toplam Birikim: ₺${AMOUNT}
-🎯 Hedefime doğru ilerliyorum
-💪 Her gün biraz daha yaklaşıyorum
+        # ============================================
+        # GÖRSEL ENHANCEMENT
+        # ============================================
+        
+        visual_styles = [
+            "professional photography, natural lighting, shallow depth of field, 8k resolution",
+            "lifestyle photography, warm golden hour, authentic moment, high quality",
+            "modern minimalist aesthetic, clean bright atmosphere, professional composition",
+            "cozy indoor scene, soft window light, intimate comfortable setting, magazine worthy",
+            "studio quality portrait, perfect lighting, commercial grade photography",
+            "flat lay composition, overhead shot, perfectly arranged, Instagram aesthetic",
+            "bokeh background, dreamy atmosphere, professional color grading",
+            "vibrant colors, high contrast, editorial style, premium quality",
+            "soft pastel tones, gentle lighting, elegant composition, Pinterest popular",
+            "dramatic lighting, cinematic feel, high-end production quality"
+        ]
+        
+        artistic_styles = [
+            "watercolor illustration style", "digital art aesthetic", "3D render style",
+            "minimalist vector art", "hand-drawn sketch style", "modern infographic design",
+            "gradient geometric design", "paper craft aesthetic", "vintage poster style"
+        ]
+        
+        emotional_tones = [
+            "inspiring and motivational", "calm and peaceful", "joyful and optimistic",
+            "confident and empowering", "warm and inviting", "luxurious and aspirational",
+            "energetic and dynamic", "sophisticated and elegant", "playful and fun"
+        ]
 
-#tasarruf #hedefim #parabirikimi #finansalözgürlük #birikim #motivasyon #başarı #hedeflerim #${GOAL}"
-          
-          echo "caption<<EOF" >> $GITHUB_OUTPUT
-          echo "$CAPTION" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+        # ============================================
+        # AKILLI İÇERİK SEÇİMİ
+        # ============================================
+        
+        current_hour = datetime.now().hour
+        
+        if 6 <= current_hour < 12:
+            # Sabah: Motivasyonel, enerji
+            category_weights = {
+                "motivational_quotes": 0.3,
+                "smart_strategies": 0.3,
+                "money_growth": 0.2,
+                "goal_achievement": 0.2
+            }
+        elif 12 <= current_hour < 18:
+            # Öğle: Bilgilendirici, pratik
+            category_weights = {
+                "smart_strategies": 0.4,
+                "money_growth": 0.3,
+                "piggy_bank_cute": 0.2,
+                "lifestyle_dreams": 0.1
+            }
+        else:
+            # Akşam: Duygusal, hayal kurma
+            category_weights = {
+                "lifestyle_dreams": 0.3,
+                "goal_achievement": 0.3,
+                "piggy_bank_cute": 0.2,
+                "motivational_quotes": 0.2
+            }
+        
+        categories = list(category_weights.keys())
+        weights = list(category_weights.values())
+        selected_category = random.choices(categories, weights=weights)[0]
+        
+        content = content_library[selected_category]
+        
+        # Hedef seçimi
+        goal = random.choice(all_goals)
 
-      - name: Pinterest'e Paylaş (IFTTT)
-        run: |
-          curl -X POST "https://maker.ifttt.com/trigger/savings_update/with/key/${{ secrets.IFTTT_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "value1": "${{ github.event.inputs.amount || '20.00' }}",
-              "value2": "${{ github.event.inputs.goal || 'araba' }}",
-              "value3": "${{ steps.generate_image.outputs.image_url }}"
-            }'
-          
-          echo "✅ Pinterest'e başarıyla paylaşıldı!"
-          echo "📌 Görsel URL: ${{ steps.generate_image.outputs.image_url }}"
-          echo "📝 Caption hazır: ${{ steps.create_caption.outputs.caption }}"
+        # ============================================
+        # PROMPT ENGİNEERİNG
+        # ============================================
+        
+        scene = random.choice(content["scenes"])
+        
+        # Rastgele stil karışımı
+        if random.random() < 0.7:
+            style = random.choice(visual_styles)
+        else:
+            style = random.choice(artistic_styles)
+        
+        tone = random.choice(emotional_tones)
+        
+        master_prompt = (
+            f"{scene}, "
+            f"{style}, "
+            f"{tone} mood, "
+            f"Turkish savings and finance theme, "
+            f"no text overlays, no watermarks, no logos, "
+            f"clean professional aesthetic, "
+            f"Pinterest optimized, vertical format"
+        )
+        
+        print(f"🎨 Kategori: {selected_category}")
+        print(f"🎯 Hedef: {goal}")
+        print(f"📸 Prompt: {master_prompt[:120]}...")
 
-      - name: Sonuç Raporu
-        run: |
-          echo "### 📊 Paylaşım Raporu" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Miktar:** ₺${{ github.event.inputs.amount || '20.00' }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Hedef:** ${{ github.event.inputs.goal || 'araba' }}" >> $GITHUB_STEP_SUMMARY
-          echo "**İlerleme:** %${{ github.event.inputs.percentage || '2' }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Görsel Prompt:** ${{ steps.select_image.outputs.prompt }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Görsel URL:** ${{ steps.generate_image.outputs.image_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Durum:** Başarıyla paylaşıldı!" >> $GITHUB_STEP_SUMMARY
+        # ============================================
+        # GÖRSEL OLUŞTURMA
+        # ============================================
+        
+        encoded_prompt = urllib.parse.quote(master_prompt)
+        
+        # Benzersiz seed
+        timestamp = int(datetime.now().timestamp())
+        random_factor = random.randint(1, 999999)
+        prompt_hash = int(hashlib.md5(master_prompt.encode()).hexdigest()[:8], 16)
+        unique_seed = (timestamp + random_factor + prompt_hash) % 1000000
+        
+        # Pinterest optimal boyutlar
+        dimensions_options = [
+            {"width": 1000, "height": 1500, "ratio": "2:3"},
+            {"width": 1080, "height": 1620, "ratio": "2:3"},
+            {"width": 1000, "height": 1400, "ratio": "5:7"}
+        ]
+        
+        dimensions = random.choice(dimensions_options)
+        
+        image_url = (
+            f"https://image.pollinations.ai/prompt/{encoded_prompt}"
+            f"?width={dimensions['width']}"
+            f"&height={dimensions['height']}"
+            f"&seed={unique_seed}"
+            f"&nologo=true"
+            f"&enhance=true"
+            f"&model=flux"
+        )
+        
+        print(f"🖼️  Boyut: {dimensions['width']}x{dimensions['height']} ({dimensions['ratio']})")
+        print(f"🔢 Seed: {unique_seed}")
+
+        # ============================================
+        # SEO-OPTİMİZE İÇERİK
+        # ============================================
+        
+        title = random.choice(content["titles"])
+        
+        # Premium hashtag stratejisi
+        core_hashtags = ["#tasarruf", "#birikim", "#parabirikimi", "#hedef"]
+        
+        trending_hashtags = [
+            "#finansalözgürlük", "#parayönetimi", "#bütçe", "#yatırım",
+            "#başarı", "#motivasyon", "#hedeflerim", "#zenginlik",
+            "#akıllıtasarruf", "#gelecek", "#hayaller", "#bağımsızlık"
+        ]
+        
+        goal_hashtags = [
+            f"#{goal.replace(' ', '')}", "#hedefimvar", "#hayalkur",
+            "#başarıhikayesi", "#ilerleme", "#azimvekararlılık"
+        ]
+        
+        lifestyle_hashtags = [
+            "#yaşamtarzı", "#minimalizm", "#bilinçlitüketim",
+            "#finansaleğitim", "#kişiselgelişim", "#başarımotivasyonu"
+        ]
+        
+        # Hashtag kombinasyonu
+        selected_hashtags = (
+            core_hashtags +
+            random.sample(trending_hashtags, 6) +
+            random.sample(goal_hashtags, 3) +
+            random.sample(lifestyle_hashtags, 3)
+        )
+        
+        # Çekici açıklamalar
+        descriptions = [
+            f"💰 {goal.upper()} hedefine adım adım yaklaşıyorsun! Küçük birikimlerin büyük hayallere dönüşüyor. Sen de bu başarı hikayesinin bir parçası ol!",
+            
+            f"🎯 Hedefin {goal} mı? Mükemmel! Günde sadece küçük bir miktar biriktirerek hayallerini gerçekleştirebilirsin. Başarı hikayeni şimdi başlıyor!",
+            
+            f"✨ {goal} için birikim yapmak hiç bu kadar kolay olmamıştı! Otomatik hatırlatmalar, ilerleme takibi ve motivasyon - hepsi ücretsiz!",
+            
+            f"🚀 {goal.capitalize()} hayalin artık çok yakın! Akıllı tasarruf stratejileri ve disiplinli birikim ile hedefe ulaş. Sen de yapabilirsin!",
+            
+            f"💎 Her büyük başarı küçük adımlarla başlar. {goal} için bugün attığın küçük adımlar yarının büyük başarısı olacak!"
+        ]
+        
+        cta_options = [
+            "👉 Ücretsiz başla, hedefine ulaş!",
+            "📱 Hemen kaydol, ilk adımı at!",
+            "🎁 Tamamen ücretsiz, sınırsız kullanım!",
+            "⭐ 10,000+ mutlu kullanıcıya katıl!",
+            "🔥 Şimdi başla, yarın teşekkür et!"
+        ]
+        
+        final_description = (
+            f"{random.choice(descriptions)}\n\n"
+            f"{random.choice(cta_options)}\n"
+            f"🔗 {os.environ.get('WEBSITE_URL', 'https://yoursite.com')}\n\n"
+            f"{' '.join(selected_hashtags)}"
+        )
+
+        # ============================================
+        # PINTEREST'E GÖNDER
+        # ============================================
+        
+        ifttt_url = f"https://maker.ifttt.com/trigger/savings_update/with/key/{os.environ['IFTTT_KEY']}"
+        
+        payload = {
+            "value1": image_url,
+            "value2": title,
+            "value3": final_description
+        }
+        
+        print(f"\n📌 PINTEREST'E GÖNDERİLİYOR")
+        print(f"Başlık: {title}")
+        print(f"Açıklama: {final_description[:100]}...")
+        print(f"Görsel: {image_url[:80]}...")
+        
+        response = requests.post(ifttt_url, json=payload, timeout=30)
+        
+        if response.status_code == 200:
+            print(f"\n✅ BAŞARILI! Pin Pinterest'te yayınlandı")
+            print(f"🎯 Kategori: {selected_category}")
+            print(f"🎨 Hedef: {goal}")
+            print(f"📊 Hashtag sayısı: {len(selected_hashtags)}")
+        else:
+            print(f"\n❌ HATA: {response.status_code}")
+            print(f"Yanıt: {response.text}")
+            
+        # Log kaydet
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "category": selected_category,
+            "goal": goal,
+            "seed": unique_seed,
+            "status": "success" if response.status_code == 200 else "failed"
+        }
+        print(f"\n📝 Log: {json.dumps(log_entry, indent=2)}")
+        
+        EOF
+    
+    - name: Tamamlama Özeti
+      run: |
+        echo "✅ Pinterest tasarruf otomasyonu tamamlandı"
+        echo "⏰ Sonraki çalışma ~6 saat sonra"
+        echo "📈 Sürdürülebilir trafik oluşturuluyor"
