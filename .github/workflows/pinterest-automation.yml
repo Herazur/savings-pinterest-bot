@@ -2,14 +2,12 @@ name: Pinterest Wealth Automation
 
 on:
   schedule:
-    # Strategic posting - IFTTT free tier friendly
-    # Posting 5 times per week (Mon, Tue, Thu, Fri, Sat)
-    - cron: '0 9 * * 1'    # Monday 12:00 PM TR
-    - cron: '0 9 * * 2'    # Tuesday 12:00 PM TR
-    - cron: '0 9 * * 4'    # Thursday 12:00 PM TR
-    - cron: '0 9 * * 5'    # Friday 12:00 PM TR
-    - cron: '0 9 * * 6'    # Saturday 12:00 PM TR
-    # Stays under IFTTT limits while maintaining consistent presence
+    # Haftada 5 kez (Pzt, Sal, Per, Cum, Cmt)
+    - cron: '0 9 * * 1'    # Pazartesi 12:00 TR
+    - cron: '0 9 * * 2'    # Salı 12:00 TR
+    - cron: '0 9 * * 4'    # Perşembe 12:00 TR
+    - cron: '0 9 * * 5'    # Cuma 12:00 TR
+    - cron: '0 9 * * 6'    # Cumartesi 12:00 TR
   workflow_dispatch:
   push:
     branches: [ main, master ]
@@ -27,11 +25,7 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Install Dependencies
-      run: |
-        pip install requests
-    
-    - name: Generate & Post Premium Wealth Content
+    - name: Post Wealth Content
       env:
         IFTTT_KEY: cUu4H4H-go1BkVlG-_mnnq
         WEBSITE_URL: https://savetracker.site
@@ -40,451 +34,186 @@ jobs:
         import requests
         import random
         import os
-        import json
         from datetime import datetime
         import urllib.parse
         import hashlib
 
         # ============================================
-        # PREMIUM WEALTH & LUXURY CONTENT LIBRARY
+        # WEALTH & LUXURY CONTENT
         # ============================================
         
-        content_library = {
-            "luxury_cars": {
+        content_types = [
+            {
+                "name": "luxury_cars",
                 "scenes": [
-                    "sleek black Lamborghini Aventador parked in front of modern mansion, luxury lifestyle",
-                    "stunning red Ferrari 488 on mountain road, sunset golden hour, wealth success",
-                    "elegant white Rolls-Royce Phantom with champagne interior, ultimate luxury",
-                    "powerful Porsche 911 Turbo S in urban setting, high-end lifestyle",
-                    "exclusive Mercedes-Benz S-Class in front of 5-star hotel, executive luxury",
-                    "pristine Bentley Continental GT on coastal highway, ocean view, prosperity",
-                    "matte black McLaren 720S in modern garage, supercar collection",
-                    "limited edition Bugatti Chiron at luxury estate, extreme wealth",
-                    "custom Aston Martin DBS Superleggera, British elegance and power",
-                    "Tesla Model S Plaid in minimalist modern setting, tech luxury",
-                    "Range Rover SVAutobiography at mountain resort, adventure luxury",
-                    "BMW M8 Competition on race track, performance meets luxury"
+                    "sleek black Lamborghini Aventador parked in front of modern mansion",
+                    "stunning red Ferrari on mountain road at golden sunset",
+                    "elegant white Rolls-Royce Phantom with luxury interior",
+                    "powerful Porsche 911 Turbo in urban night setting",
+                    "Mercedes-Benz S-Class in front of five star hotel",
+                    "pristine Bentley Continental GT on coastal highway",
+                    "matte black McLaren 720S in modern garage collection"
                 ],
                 "titles": [
                     "💎 Dream Car = Smart Savings Today",
                     "🏎️ Your Luxury Vehicle Awaits",
                     "🚗 From Savings to Supercar",
-                    "⚡ Fast Track to Your Dream Ride",
-                    "🔑 Keys to Your Future Success",
-                    "🏆 Drive Your Dreams Into Reality",
-                    "💰 Save Smart, Drive Luxury",
-                    "✨ Your Garage Goals Start Here"
+                    "⚡ Fast Track to Your Dream Ride"
                 ]
             },
-            
-            "luxury_homes": {
+            {
+                "name": "luxury_homes",
                 "scenes": [
-                    "stunning modern mansion with infinity pool overlooking ocean, architectural masterpiece",
-                    "luxurious penthouse apartment with floor-to-ceiling windows, city skyline view",
-                    "elegant Mediterranean villa with marble columns, sunset ambiance, prosperity",
-                    "contemporary minimalist home with indoor garden, zen luxury living",
-                    "grand estate with fountain courtyard, European palace style",
-                    "beachfront luxury villa with private dock, yacht in background",
-                    "mountain chalet with panoramic glass walls, snow-capped peaks view",
-                    "modern smart home with ambient lighting, high-tech luxury",
-                    "tropical paradise villa with palm trees, infinity pool, ultimate retreat",
-                    "urban luxury loft with exposed brick and designer furniture",
-                    "classic colonial mansion with manicured gardens, old money aesthetic",
-                    "futuristic eco-luxury home with solar panels, sustainable wealth"
+                    "stunning modern mansion with infinity pool overlooking ocean",
+                    "luxurious penthouse with floor-to-ceiling windows and city view",
+                    "elegant Mediterranean villa with marble columns at sunset",
+                    "contemporary home with indoor garden and zen aesthetic",
+                    "beachfront luxury villa with private dock and yacht",
+                    "mountain chalet with panoramic glass walls and snow peaks"
                 ],
                 "titles": [
                     "🏰 Your Dream Home Starts With Savings",
                     "🏡 From Renting to Owning Paradise",
                     "🌅 Mansion Living Made Possible",
-                    "✨ Home Sweet Luxury Home",
-                    "🔑 Unlock Your Real Estate Dreams",
-                    "💎 Property Empire Begins Today",
-                    "🏖️ Beach House Goals Achieved",
-                    "🌟 Your Palace Awaits"
+                    "✨ Home Sweet Luxury Home"
                 ]
             },
-            
-            "wealth_lifestyle": {
+            {
+                "name": "wealth_lifestyle",
                 "scenes": [
-                    "private jet interior with champagne glasses, first-class luxury travel",
-                    "luxury yacht deck at sunset, Mediterranean lifestyle, freedom",
-                    "designer shopping bags from Gucci, Louis Vuitton, Chanel on marble floor",
-                    "Rolex watch collection displayed elegantly, time is wealth",
-                    "five-star hotel suite with city view, room service, luxury living",
-                    "business class airplane seat with laptop, successful entrepreneur lifestyle",
-                    "exclusive golf club membership, networking and prosperity",
-                    "private island resort cabana, ultimate vacation goals",
-                    "luxury spa day setup, self-care and abundance",
-                    "expensive wine cellar with vintage collection, sophisticated wealth",
-                    "designer walk-in closet with organized luxury fashion",
-                    "helicopter tour over city skyline, elevated lifestyle"
+                    "private jet interior with champagne glasses, luxury travel",
+                    "luxury yacht deck at sunset on Mediterranean sea",
+                    "Rolex watch collection displayed elegantly on marble",
+                    "five star hotel suite with panoramic city view",
+                    "private island resort cabana with crystal water",
+                    "exclusive golf club with networking professionals"
                 ],
                 "titles": [
                     "✈️ Live the Life You Deserve",
-                    "🥂 Champagne Lifestyle on Beer Budget (Fixed)",
-                    "💼 Success Leaves Clues - Follow Them",
-                    "🌍 World Travel Fund Building",
-                    "⛵ Yacht Life Within Reach",
-                    "👔 Dress for Success, Save for More",
-                    "🍾 Celebrate Future Wins Today",
-                    "💎 Luxury Living Unlocked"
+                    "🥂 Luxury Lifestyle Within Reach",
+                    "💼 Success Starts With Savings",
+                    "🌍 World Travel Fund Building"
                 ]
             },
-            
-            "money_stacks": {
+            {
+                "name": "money_success",
                 "scenes": [
-                    "neat stacks of hundred dollar bills on marble desk, wealth building",
-                    "golden coins arranged in ascending towers, growth visualization",
-                    "cash money fan display with credit cards, financial freedom",
-                    "piggy bank surrounded by dollar bills and coins, smart savings",
-                    "money tree with dollar bills as leaves, prosperity growing",
-                    "safe deposit box filled with cash and gold bars, security",
-                    "hands counting large stack of money, financial success",
-                    "dollar bills raining down, abundance and prosperity",
-                    "glass jar overflowing with coins and bills, savings overflow",
-                    "wallet stuffed with hundred dollar bills, wealth accumulation",
-                    "money rolling in like waves, cash flow abundance",
-                    "treasure chest opened revealing gold coins, wealth discovery"
+                    "neat stacks of hundred dollar bills on marble desk",
+                    "golden coins arranged in ascending growth towers",
+                    "piggy bank surrounded by dollar bills, smart savings concept",
+                    "safe deposit box filled with cash and gold bars",
+                    "stock market graphs showing upward trend on screens",
+                    "golden Bitcoin coin with rising chart background"
                 ],
                 "titles": [
                     "💵 Stack Your Wealth Daily",
                     "💰 Money Mindset = Money Reality",
                     "📈 Watch Your Savings Multiply",
-                    "🔥 Compound Interest Magic",
-                    "💎 Every Dollar Counts",
-                    "🏦 Build Your Empire One Bill at a Time",
-                    "✨ Financial Freedom Formula",
-                    "🚀 Exponential Wealth Growth"
+                    "🔥 Financial Freedom Formula"
                 ]
             },
-            
-            "investment_success": {
+            {
+                "name": "vacation_dreams",
                 "scenes": [
-                    "stock market graphs showing upward trend on multiple screens",
-                    "golden Bitcoin coin with rising chart background, crypto wealth",
-                    "real estate property documents with keys and calculator",
-                    "dividend check with growing plant, passive income concept",
-                    "portfolio dashboard showing green profits, investment success",
-                    "gold bars stacked neatly with financial reports, solid assets",
-                    "business handshake over contract, deal closed successfully",
-                    "smartphone showing investment app with positive returns",
-                    "financial advisor pointing at growth chart, expert guidance",
-                    "retirement fund growing visualization, long-term planning",
-                    "multiple income streams diagram, diversification strategy",
-                    "compound interest growth chart over decades, time value"
-                ],
-                "titles": [
-                    "📊 Smart Money Moves for 2025",
-                    "💹 Investment Game Strong",
-                    "🎯 Passive Income Unlocked",
-                    "🔐 Secure Your Financial Future",
-                    "📈 Portfolio Growth Strategies",
-                    "💰 Make Money While You Sleep",
-                    "🏆 Investor Mindset Activated",
-                    "⚡ Wealth Building Blueprint"
-                ]
-            },
-            
-            "success_motivation": {
-                "scenes": [
-                    "entrepreneur working on laptop in luxury office, success mindset",
-                    "motivational quote on minimalist gold background, wisdom",
-                    "chess pieces on board, strategic thinking for wealth",
-                    "sunrise over city skyline, new beginning energy",
-                    "person meditating in luxury home, peaceful prosperity",
-                    "vision board with dreams and goals collaged beautifully",
-                    "trophy and medals display, achievement celebration",
-                    "journals and planners for goal setting, organized success",
-                    "climbing mountain metaphor, reaching financial summit",
-                    "keys to success arranged artistically, opportunity",
-                    "hourglass with gold sand, time management and wealth",
-                    "lighthouse shining bright, guidance to financial freedom"
-                ],
-                "titles": [
-                    "🌟 Your Success Story Starts Now",
-                    "💪 Mindset Shifts That Build Wealth",
-                    "🎯 Goals → Plans → Action → Results",
-                    "✨ Manifesting Abundance Daily",
-                    "🔥 Hustle Hard, Save Harder",
-                    "🏆 Winners Never Stop Learning",
-                    "💡 Financial Intelligence Boost",
-                    "🚀 Elevate Your Money Game"
-                ]
-            },
-            
-            "luxury_watches": {
-                "scenes": [
-                    "Rolex Submariner on wrist with luxury car steering wheel",
-                    "Patek Philippe collection display case, investment timepieces",
-                    "Audemars Piguet Royal Oak close-up, executive power",
-                    "Richard Mille on wrist during yacht trip, extreme luxury",
-                    "Omega Speedmaster with leather strap, classic elegance",
-                    "TAG Heuer chronograph in action shot, sports luxury",
-                    "Cartier watch with jewelry, sophisticated refinement",
-                    "Apple Watch Ultra with designer accessories, tech luxury",
-                    "vintage watch collection on velvet display, heritage value",
-                    "luxury watch winder box rotating, care and maintenance",
-                    "diver's watch underwater shot, adventure luxury",
-                    "dress watch at formal event, timeless sophistication"
-                ],
-                "titles": [
-                    "⌚ Time is Money - Invest in Both",
-                    "💎 Luxury Timepiece Collection Goals",
-                    "🕰️ Watches That Appreciate in Value",
-                    "⏱️ Status Symbol on Your Wrist",
-                    "👑 Crown Your Success",
-                    "✨ Timelessly Wealthy",
-                    "🎩 Gentleman's Luxury Essential",
-                    "💼 Executive Power Moves"
-                ]
-            },
-            
-            "vacation_goals": {
-                "scenes": [
-                    "overwater bungalow in Maldives, crystal clear water, paradise",
-                    "Santorini Greece white buildings with blue domes, romantic getaway",
-                    "luxury safari lodge in African savanna, adventure travel",
-                    "Bali infinity pool overlooking rice terraces, zen luxury",
-                    "Dubai Burj Al Arab hotel suite, opulent middle eastern luxury",
-                    "Swiss Alps ski resort chalet, winter wonderland escape",
-                    "Caribbean beach cabana with turquoise water, tropical bliss",
-                    "Paris luxury hotel balcony view of Eiffel Tower, romance",
-                    "Japanese ryokan hot spring bath, cultural luxury experience",
-                    "New York City penthouse view, urban adventure",
-                    "Amazon rainforest luxury eco-lodge, nature immersion",
-                    "Italian coastal villa in Amalfi Coast, Mediterranean dream"
+                    "overwater bungalow in Maldives with crystal clear water",
+                    "Santorini Greece white buildings with blue domes at sunset",
+                    "Bali infinity pool overlooking green rice terraces",
+                    "Dubai luxury hotel suite with city skyline view",
+                    "Swiss Alps ski resort chalet in winter wonderland",
+                    "Caribbean beach with turquoise water and palm trees"
                 ],
                 "titles": [
                     "✈️ Your Next Vacation Funded by Savings",
                     "🌴 Paradise is Just Savings Away",
                     "🏖️ Beach Life = Smart Money Life",
-                    "🗺️ World Explorer Savings Plan",
-                    "🌅 Sunset Views Require Sunrise Savings",
-                    "🎒 Travel More, Worry Less",
-                    "🏝️ Destination Freedom",
-                    "📸 Make Memories, Not Excuses"
+                    "🗺️ World Explorer Savings Plan"
                 ]
             }
-        }
-
-        # ============================================
-        # VISUAL ENHANCEMENT PARAMETERS
-        # ============================================
-        
-        visual_styles = [
-            "professional commercial photography, perfect lighting, 8k ultra HD, magazine quality",
-            "cinematic lifestyle photography, golden hour, film grain, editorial style",
-            "luxury advertising aesthetic, dramatic lighting, high contrast, premium feel",
-            "architectural digest photography, perfectly composed, designer showcase",
-            "automotive photography perfection, motion blur, dynamic angle, showroom quality",
-            "real estate luxury photography, wide angle, bright airy, aspirational",
-            "financial success imagery, clean corporate, professional grade, trustworthy",
-            "instagram influencer aesthetic, perfect composition, highly curated",
-            "vogue magazine style, fashion forward, sophisticated elegance",
-            "national geographic quality, stunning detail, world-class photography"
-        ]
-        
-        camera_techniques = [
-            "shallow depth of field, bokeh background",
-            "wide angle dramatic perspective",
-            "macro close-up detail shot",
-            "aerial drone view from above",
-            "low angle hero shot",
-            "golden ratio composition",
-            "leading lines perspective",
-            "symmetrical balance",
-            "rule of thirds perfection",
-            "environmental portrait context"
-        ]
-        
-        lighting_conditions = [
-            "golden hour warm glow",
-            "blue hour moody atmosphere",
-            "studio perfect lighting",
-            "natural window light",
-            "dramatic side lighting",
-            "backlit silhouette glow",
-            "overcast soft diffused light",
-            "sunset warm tones",
-            "nighttime ambient lights",
-            "sunrise hopeful light"
         ]
 
-        # ============================================
-        # SMART CONTENT SELECTION
-        # ============================================
-        
-        current_hour = datetime.now().hour
-        
-        if 6 <= current_hour < 12:
-            # Morning: Motivational, cars, success
-            category_weights = {
-                "success_motivation": 0.25,
-                "luxury_cars": 0.25,
-                "investment_success": 0.20,
-                "money_stacks": 0.15,
-                "luxury_watches": 0.15
-            }
-        elif 12 <= current_hour < 18:
-            # Afternoon: Lifestyle, homes, wealth
-            category_weights = {
-                "luxury_homes": 0.30,
-                "wealth_lifestyle": 0.25,
-                "luxury_cars": 0.20,
-                "vacation_goals": 0.15,
-                "money_stacks": 0.10
-            }
-        else:
-            # Evening: Dreams, lifestyle, relaxation
-            category_weights = {
-                "vacation_goals": 0.25,
-                "luxury_homes": 0.25,
-                "wealth_lifestyle": 0.20,
-                "luxury_watches": 0.15,
-                "success_motivation": 0.15
-            }
-        
-        categories = list(category_weights.keys())
-        weights = list(category_weights.values())
-        selected_category = random.choices(categories, weights=weights)[0]
-        
-        content = content_library[selected_category]
+        # Select random category
+        category = random.choice(content_types)
+        scene = random.choice(category["scenes"])
+        title = random.choice(category["titles"])
 
-        # ============================================
-        # ADVANCED PROMPT ENGINEERING
-        # ============================================
+        # Visual enhancement
+        styles = [
+            "professional photography, perfect lighting, 8k quality",
+            "cinematic style, golden hour, film aesthetic",
+            "luxury advertising, dramatic lighting, premium feel",
+            "magazine quality, perfectly composed, editorial style"
+        ]
         
-        scene = random.choice(content["scenes"])
-        style = random.choice(visual_styles)
-        technique = random.choice(camera_techniques)
-        lighting = random.choice(lighting_conditions)
+        style = random.choice(styles)
         
-        master_prompt = (
+        # Create prompt
+        prompt = (
             f"{scene}, "
             f"{style}, "
-            f"{technique}, "
-            f"{lighting}, "
-            f"hyperrealistic, photorealistic quality, "
-            f"sharp focus, professional color grading, "
+            f"hyperrealistic, sharp focus, "
             f"no text, no watermarks, no logos, "
-            f"clean aesthetic, Pinterest viral worthy, "
-            f"vertical format optimized"
+            f"vertical format, Pinterest optimized"
         )
         
-        print(f"🎨 Category: {selected_category}")
-        print(f"📸 Prompt: {master_prompt[:150]}...")
+        print(f"🎨 Category: {category['name']}")
+        print(f"📸 Scene: {scene}")
+        print(f"📌 Title: {title}")
 
-        # ============================================
-        # IMAGE GENERATION (ULTRA QUALITY)
-        # ============================================
+        # Generate image
+        encoded_prompt = urllib.parse.quote(prompt)
         
-        encoded_prompt = urllib.parse.quote(master_prompt)
-        
-        # Unique seed generation
         timestamp = int(datetime.now().timestamp())
-        random_factor = random.randint(1, 999999)
-        prompt_hash = int(hashlib.md5(master_prompt.encode()).hexdigest()[:8], 16)
-        unique_seed = (timestamp + random_factor + prompt_hash) % 1000000
+        random_num = random.randint(1, 999999)
+        unique_seed = (timestamp + random_num) % 1000000
         
-        # Pinterest optimal dimensions
-        dimensions_options = [
-            {"width": 1000, "height": 1500, "ratio": "2:3"},
-            {"width": 1080, "height": 1620, "ratio": "2:3"},
-            {"width": 1000, "height": 1400, "ratio": "5:7"}
+        sizes = [
+            {"width": 1000, "height": 1500},
+            {"width": 1080, "height": 1620}
         ]
-        
-        dimensions = random.choice(dimensions_options)
+        size = random.choice(sizes)
         
         image_url = (
             f"https://image.pollinations.ai/prompt/{encoded_prompt}"
-            f"?width={dimensions['width']}"
-            f"&height={dimensions['height']}"
+            f"?width={size['width']}"
+            f"&height={size['height']}"
             f"&seed={unique_seed}"
             f"&nologo=true"
             f"&enhance=true"
-            f"&model=flux"
         )
         
-        print(f"🖼️  Size: {dimensions['width']}x{dimensions['height']} ({dimensions['ratio']})")
-        print(f"🔢 Seed: {unique_seed}")
+        print(f"🖼️  Image: {image_url[:80]}...")
 
-        # ============================================
-        # SEO-OPTIMIZED ENGLISH CONTENT
-        # ============================================
-        
-        title = random.choice(content["titles"])
-        
-        # Premium English hashtag strategy
-        core_hashtags = [
-            "#WealthBuilding", "#FinancialFreedom", "#MoneyGoals", "#SavingsMoney"
-        ]
-        
-        trending_hashtags = [
-            "#MillionaireMindset", "#LuxuryLifestyle", "#PassiveIncome", "#InvestSmart",
-            "#MoneyMotivation", "#FinancialSuccess", "#WealthMindset", "#RichLife",
-            "#MoneyMoves", "#InvestingTips", "#SmartMoney", "#FinancialGoals",
-            "#MoneyManagement", "#WealthCreation", "#SuccessMindset", "#DreamBig"
-        ]
-        
-        lifestyle_hashtags = [
-            "#LuxuryCars", "#DreamHome", "#LuxuryTravel", "#SuccessQuotes",
-            "#Entrepreneurship", "#BossLife", "#LuxuryLiving", "#WealthyLifestyle",
-            "#FinancialIndependence", "#RetirementGoals", "#InvestmentStrategy"
-        ]
-        
-        niche_hashtags = [
-            "#SavingsChallenge", "#MoneyTips", "#BudgetingTips", "#FinancialPlanning",
-            "#WealthManagement", "#MoneyMindset", "#FinancialEducation", "#SmartSavings"
-        ]
-        
-        # Strategic hashtag combination
-        selected_hashtags = (
-            core_hashtags +
-            random.sample(trending_hashtags, 7) +
-            random.sample(lifestyle_hashtags, 5) +
-            random.sample(niche_hashtags, 4)
-        )
-        
-        # Compelling descriptions
+        # Create description
         descriptions = [
-            f"💰 Your dream life isn't just a fantasy - it's a plan away! Start building wealth with smart savings strategies. Every dollar saved today is freedom earned tomorrow.",
+            "💰 Your dream life isn't fantasy - it's a savings plan away! Start building wealth with smart money moves. Every dollar saved is freedom earned.",
             
-            f"✨ Stop dreaming, start doing! The luxury lifestyle you desire begins with disciplined saving and smart money moves. Track your goals, celebrate milestones, achieve greatness.",
+            "✨ Stop dreaming, start doing! Luxury lifestyle begins with disciplined saving. Track goals, celebrate wins, achieve greatness.",
             
-            f"🚀 From zero to hero - your financial transformation starts NOW! Automate your savings, track your progress, and watch your wealth multiply. The life you want is waiting.",
+            "🚀 Financial transformation starts NOW! Automate savings, track progress, watch wealth multiply. The life you want is waiting.",
             
-            f"💎 Luxury isn't luck, it's a choice. Choose to save smart, invest wisely, and build the abundant life you deserve. Your future self will thank you!",
+            "💎 Luxury isn't luck, it's choice. Save smart, invest wise, build abundance. Your future self will thank you!",
             
-            f"🏆 Champions are made in the small daily decisions. Save consistently, invest intelligently, and watch compound interest work its magic. Your empire awaits!",
-            
-            f"⚡ Financial freedom isn't a destination, it's a journey. Start today with automated savings reminders and goal tracking. Make every dollar count toward your dreams.",
-            
-            f"🌟 The secret to wealth? Start before you're ready. Our FREE savings tracker helps you stay consistent, motivated, and on track to achieve your biggest goals.",
-            
-            f"💼 Successful people don't just work hard - they work SMART with their money. Join thousands using our platform to transform savings into real wealth."
+            "🏆 Success is daily decisions. Save consistently, invest intelligently, let compound interest work magic. Your empire awaits!"
         ]
         
-        cta_options = [
-            "👉 Start Building Wealth FREE",
-            "🎯 Track Your Money Goals Now",
-            "💰 Join 10,000+ Smart Savers",
-            "✨ Transform Your Finances Today",
-            "🚀 Begin Your Wealth Journey",
-            "🔥 Get Free Savings Reminders",
-            "💎 Unlock Financial Freedom",
-            "⭐ Start Saving Smarter Today"
+        # Hashtags
+        hashtags = [
+            "#WealthBuilding", "#FinancialFreedom", "#MoneyGoals", "#SavingsMoney",
+            "#MillionaireMindset", "#LuxuryLifestyle", "#PassiveIncome", "#MoneyMotivation",
+            "#SmartMoney", "#FinancialGoals", "#WealthMindset", "#SuccessMindset",
+            "#LuxuryCars", "#DreamHome", "#FinancialIndependence", "#MoneyTips"
         ]
+        
+        random.shuffle(hashtags)
+        selected_tags = " ".join(hashtags[:12])
         
         final_description = (
             f"{random.choice(descriptions)}\n\n"
-            f"{random.choice(cta_options)} 🔗 {os.environ['WEBSITE_URL']}\n\n"
-            f"{' '.join(selected_hashtags)}"
+            f"🎯 Start FREE → {os.environ['WEBSITE_URL']}\n\n"
+            f"{selected_tags}"
         )
 
-        # ============================================
-        # POST TO PINTEREST VIA IFTTT
-        # ============================================
-        
+        # Send to IFTTT
         ifttt_url = f"https://maker.ifttt.com/trigger/pinterest_post_save/with/key/{os.environ['IFTTT_KEY']}"
         
         payload = {
@@ -493,42 +222,22 @@ jobs:
             "value3": final_description
         }
         
-        print(f"\n📌 POSTING TO PINTEREST")
-        print(f"Title: {title}")
-        print(f"Description: {final_description[:100]}...")
-        print(f"Image: {image_url[:80]}...")
-        
-        print(f"\n🔗 IFTTT URL: {ifttt_url}")
-        print(f"📦 Payload:")
-        print(json.dumps(payload, indent=2))
+        print(f"\n📌 Posting to Pinterest...")
+        print(f"🔗 IFTTT: {ifttt_url}")
         
         response = requests.post(ifttt_url, json=payload, timeout=30)
         
-        print(f"\n📡 Response Status: {response.status_code}")
-        print(f"📄 Response Text: {response.text}")
+        print(f"\n📡 Status: {response.status_code}")
+        print(f"📄 Response: {response.text}")
         
         if response.status_code == 200:
-            print(f"\n✅ SUCCESS! Webhook triggered successfully")
-            print(f"🎯 Category: {selected_category}")
-            print(f"🔗 Traffic to: {os.environ['WEBSITE_URL']}")
-            print(f"📊 Hashtags: {len(selected_hashtags)}")
+            print(f"\n✅ SUCCESS!")
+            print(f"Category: {category['name']}")
+            print(f"Website: {os.environ['WEBSITE_URL']}")
         else:
             print(f"\n❌ ERROR: {response.status_code}")
-            print(f"Response: {response.text}")
-            
-        # Save log
-        log_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "category": selected_category,
-            "seed": unique_seed,
-            "status": "success" if response.status_code == 200 else "failed"
-        }
-        print(f"\n📝 Log: {json.dumps(log_entry, indent=2)}")
         
         EOF
     
-    - name: Completion Summary
-      run: |
-        echo "✅ Pinterest wealth automation completed"
-        echo "⏰ Next scheduled run according to weekly schedule"
-        echo "📈 Building luxury lifestyle traffic to savetracker.site"
+    - name: Done
+      run: echo "✅ Wealth content posted to Pinterest"
