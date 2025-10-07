@@ -485,7 +485,7 @@ jobs:
         # POST TO PINTEREST VIA IFTTT
         # ============================================
         
-        ifttt_url = f"https://maker.ifttt.com/trigger/savings_update/with/key/{os.environ['IFTTT_KEY']}"
+        ifttt_url = f"https://maker.ifttt.com/trigger/pinterest_paylas/with/key/{os.environ['IFTTT_KEY']}"
         
         payload = {
             "value1": image_url,
