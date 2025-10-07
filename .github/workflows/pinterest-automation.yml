@@ -25,6 +25,10 @@ jobs:
       with:
         python-version: '3.11'
     
+    - name: Install Dependencies
+      run: |
+        pip install requests
+    
     - name: Post Wealth Content
       env:
         IFTTT_KEY: cUu4H4H-go1BkVlG-_mnnq
