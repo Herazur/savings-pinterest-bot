@@ -1,0 +1,56 @@
+name: Pinterest Savings Tracker Auto-Post
+
+on:
+  schedule:
+    # Her gün saat 09:00'da çalışır (UTC)
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Manuel tetikleme için
+  push:
+    paths:
+      - 'savings-data.json'
+
+jobs:
+  create-and-post:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: |
+          npm install axios form-data
+      
+      - name: Generate Pinterest Image
+        id: generate
+        run: node generate-pinterest-post.js
+        env:
+          POLLINATIONS_API: 'https://image.pollinations.ai/prompt'
+      
+      - name: Upload to GitHub as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pinterest-image
+          path: output/pinterest-post.png
+      
+      - name: Trigger IFTTT Webhook
+        run: |
+          curl -X POST "https://maker.ifttt.com/trigger/savings_update/with/key/${{ secrets.IFTTT_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "value1": "${{ steps.generate.outputs.total_saved }}",
+              "value2": "${{ steps.generate.outputs.goal_name }}",
+              "value3": "${{ steps.generate.outputs.image_url }}"
+            }'
+      
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+          git add -A
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: Pinterest post generated" && git push)
