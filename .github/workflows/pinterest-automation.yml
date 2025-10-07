@@ -389,7 +389,7 @@ jobs:
         final_description = (
             f"{random.choice(descriptions)}\n\n"
             f"{random.choice(cta_options)}\n"
-            f"🔗 {os.environ.get('WEBSITE_URL', 'https://digitalpiggybank.app')}\n\n"
+            f"🔗 {os.environ.get('WEBSITE_URL', 'https://yoursite.com')}\n\n"
             f"{' '.join(selected_hashtags)}"
         )
 
