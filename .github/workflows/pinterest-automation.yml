@@ -1,4 +1,4 @@
-name: Advanced Pinterest Wealth Automation
+name: Pinterest Wealth Automation
 
 on:
   schedule:
@@ -506,17 +506,12 @@ jobs:
         
         print(f"\n📡 Response Status: {response.status_code}")
         print(f"📄 Response Text: {response.text}")
-        print(f"📋 Response Headers: {dict(response.headers)}")
         
         if response.status_code == 200:
             print(f"\n✅ SUCCESS! Webhook triggered successfully")
             print(f"🎯 Category: {selected_category}")
             print(f"🔗 Traffic to: {os.environ['WEBSITE_URL']}")
             print(f"📊 Hashtags: {len(selected_hashtags)}")
-            print(f"\n⚠️  If pin doesn't appear on Pinterest:")
-            print(f"1. Check IFTTT applet is enabled")
-            print(f"2. Verify Pinterest board is selected")
-            print(f"3. Confirm Value1={{Value1}}, Value2={{Value2}}, Value3={{Value3}}")
         else:
             print(f"\n❌ ERROR: {response.status_code}")
             print(f"Response: {response.text}")
@@ -535,5 +530,5 @@ jobs:
     - name: Completion Summary
       run: |
         echo "✅ Pinterest wealth automation completed"
-        echo "⏰ Next scheduled run in ~6 hours"
-        echo "📈 Building luxury lifestyle traffic to digitalpiggybank.app"
+        echo "⏰ Next scheduled run according to weekly schedule"
+        echo "📈 Building luxury lifestyle traffic to savetracker.site"
