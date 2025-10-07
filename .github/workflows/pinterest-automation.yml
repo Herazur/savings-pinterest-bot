@@ -34,7 +34,7 @@ jobs:
     - name: Generate & Post Premium Wealth Content
       env:
         IFTTT_KEY: dpnyddbPNFiOv6CVml5Lkc
-        WEBSITE_URL: https://digitalpiggybank.app
+        WEBSITE_URL: https://savetracker.site
       run: |
         python << 'EOF'
         import requests
