@@ -1,56 +1,121 @@
-name: Pinterest Savings Tracker Auto-Post
+name: Pinterest Otomatik Tasarruf Paylaşımı
 
 on:
   schedule:
-    # Her gün saat 09:00'da çalışır (UTC)
+    # Her gün saat 09:00'da (UTC)
     - cron: '0 9 * * *'
-  workflow_dispatch: # Manuel tetikleme için
-  push:
-    paths:
-      - 'savings-data.json'
+  
+  workflow_dispatch:
+    inputs:
+      amount:
+        description: 'Tasarruf Miktarı (TRY)'
+        required: true
+        type: string
+      goal:
+        description: 'Hedef Adı'
+        required: true
+        type: string
+      percentage:
+        description: 'İlerleme Yüzdesi'
+        required: true
+        type: string
 
 jobs:
-  create-and-post:
+  post-to-pinterest:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      
-      - name: Install dependencies
+      - name: Rastgele Görsel Seç
+        id: select_image
         run: |
-          npm install axios form-data
-      
-      - name: Generate Pinterest Image
-        id: generate
-        run: node generate-pinterest-post.js
-        env:
-          POLLINATIONS_API: 'https://image.pollinations.ai/prompt'
-      
-      - name: Upload to GitHub as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: pinterest-image
-          path: output/pinterest-post.png
-      
-      - name: Trigger IFTTT Webhook
+          # Tasarruf görselleri için AI prompt'ları
+          declare -a prompts=(
+            "Modern minimalist piggy bank with gold coins, clean white background, professional 3D render, soft lighting, Pinterest aesthetic, vertical format"
+            "Elegant money jar filled with Turkish Lira bills, glass texture, bokeh background, luxury gold accents, motivational savings concept"
+            "Digital financial dashboard showing growth chart, purple and blue gradient, futuristic UI design, clean infographic style"
+            "Cute kawaii piggy bank character celebrating with confetti, pastel colors, happy savings milestone, chibi art style"
+            "Stack of gold coins growing upward like stairs, success journey metaphor, warm lighting, inspirational wealth building"
+            "Modern smartphone showing savings app with rising graph, hands holding phone, lifestyle shot, bright colors"
+            "Minimalist target goal with arrow hitting bullseye, gold and white theme, achievement concept, clean vector style"
+            "Treasure chest overflowing with coins and gems, fantasy style with realistic rendering, wealth abundance theme"
+            "Abstract geometric money tree growing upward, modern art style, teal and gold palette, financial growth metaphor"
+            "Calculator and coins on marble desk, top view flat lay, aesthetic workspace, professional finance vibes"
+            "Glass jar with \"Dreams\" label filled with coins, fairy lights background, cozy aesthetic, goal saving concept"
+            "Futuristic holographic piggy bank projection, neon lights, cyberpunk aesthetic, tech-savvy savings theme"
+            "Watercolor illustration of hands planting money tree, soft pastel colors, nurturing wealth concept, artistic style"
+            "3D isometric financial building blocks stacking up, colorful geometric shapes, progress visualization"
+            "Luxury gold safe with digital lock showing percentage, premium metallic finish, security and wealth theme"
+            "Cute animal characters (fox, rabbit, bear) saving coins together, children's book illustration style, teamwork"
+            "Money origami crane flying upward with coin trail, artistic paper craft, freedom through savings metaphor"
+            "Modern line art illustration of savings journey path, milestone markers, minimalist black and gold design"
+            "Vintage brass piggy bank on wooden shelf with plants, aesthetic home decor, Instagram-worthy savings setup"
+            "Digital cryptocurrency wallet interface with Turkish Lira symbol, blockchain aesthetic, modern fintech design"
+          )
+          
+          # Rastgele prompt seç
+          RANDOM_INDEX=$((RANDOM % ${#prompts[@]}))
+          SELECTED_PROMPT="${prompts[$RANDOM_INDEX]}"
+          
+          echo "Selected prompt: $SELECTED_PROMPT"
+          echo "prompt=$SELECTED_PROMPT" >> $GITHUB_OUTPUT
+
+      - name: Görsel URL Oluştur
+        id: generate_image
+        run: |
+          PROMPT="${{ steps.select_image.outputs.prompt }}"
+          ENCODED_PROMPT=$(echo "$PROMPT" | jq -sRr @uri)
+          IMAGE_URL="https://image.pollinations.ai/prompt/${ENCODED_PROMPT}?width=1000&height=1500&nologo=true&model=flux&seed=$RANDOM"
+          
+          echo "Generated image URL: $IMAGE_URL"
+          echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
+
+      - name: Caption Oluştur
+        id: create_caption
+        run: |
+          # Emoji dizileri
+          EMOJIS=("💰" "🎯" "💵" "📊" "✨" "🚀" "💎" "🌟" "🏆" "🎉")
+          RANDOM_EMOJI=${EMOJIS[$RANDOM % ${#EMOJIS[@]}]}
+          
+          AMOUNT="${{ github.event.inputs.amount || '20.00' }}"
+          GOAL="${{ github.event.inputs.goal || 'araba' }}"
+          PERCENTAGE="${{ github.event.inputs.percentage || '2' }}"
+          
+          CAPTION="${RANDOM_EMOJI} ${GOAL} hedefim için %${PERCENTAGE} ilerleme kaydettim!
+
+📈 Toplam Birikim: ₺${AMOUNT}
+🎯 Hedefime doğru ilerliyorum
+💪 Her gün biraz daha yaklaşıyorum
+
+#tasarruf #hedefim #parabirikimi #finansalözgürlük #birikim #motivasyon #başarı #hedeflerim #${GOAL}"
+          
+          echo "caption<<EOF" >> $GITHUB_OUTPUT
+          echo "$CAPTION" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Pinterest'e Paylaş (IFTTT)
         run: |
           curl -X POST "https://maker.ifttt.com/trigger/savings_update/with/key/${{ secrets.IFTTT_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{
-              "value1": "${{ steps.generate.outputs.total_saved }}",
-              "value2": "${{ steps.generate.outputs.goal_name }}",
-              "value3": "${{ steps.generate.outputs.image_url }}"
+              "value1": "${{ github.event.inputs.amount || '20.00' }}",
+              "value2": "${{ github.event.inputs.goal || 'araba' }}",
+              "value3": "${{ steps.generate_image.outputs.image_url }}"
             }'
-      
-      - name: Commit and push if changed
+          
+          echo "✅ Pinterest'e başarıyla paylaşıldı!"
+          echo "📌 Görsel URL: ${{ steps.generate_image.outputs.image_url }}"
+          echo "📝 Caption hazır: ${{ steps.create_caption.outputs.caption }}"
+
+      - name: Sonuç Raporu
         run: |
-          git config --global user.name 'GitHub Actions Bot'
-          git config --global user.email 'actions@github.com'
-          git add -A
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: Pinterest post generated" && git push)
+          echo "### 📊 Paylaşım Raporu" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Miktar:** ₺${{ github.event.inputs.amount || '20.00' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Hedef:** ${{ github.event.inputs.goal || 'araba' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**İlerleme:** %${{ github.event.inputs.percentage || '2' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Görsel Prompt:** ${{ steps.select_image.outputs.prompt }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Görsel URL:** ${{ steps.generate_image.outputs.image_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Durum:** Başarıyla paylaşıldı!" >> $GITHUB_STEP_SUMMARY
