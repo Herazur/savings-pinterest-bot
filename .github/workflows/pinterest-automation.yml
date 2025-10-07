@@ -29,7 +29,7 @@ jobs:
     - name: Generate & Post Premium Wealth Content
       env:
         IFTTT_KEY: dpnyddbPNFiOv6CVml5Lkc
-        WEBSITE_URL: https://savetracker.site/
+        WEBSITE_URL: https://digitalpiggybank.app
       run: |
         python << 'EOF'
         import requests
@@ -493,13 +493,25 @@ jobs:
         print(f"Description: {final_description[:100]}...")
         print(f"Image: {image_url[:80]}...")
         
+        print(f"\n🔗 IFTTT URL: {ifttt_url}")
+        print(f"📦 Payload:")
+        print(json.dumps(payload, indent=2))
+        
         response = requests.post(ifttt_url, json=payload, timeout=30)
         
+        print(f"\n📡 Response Status: {response.status_code}")
+        print(f"📄 Response Text: {response.text}")
+        print(f"📋 Response Headers: {dict(response.headers)}")
+        
         if response.status_code == 200:
-            print(f"\n✅ SUCCESS! Wealth content published to Pinterest")
+            print(f"\n✅ SUCCESS! Webhook triggered successfully")
             print(f"🎯 Category: {selected_category}")
             print(f"🔗 Traffic to: {os.environ['WEBSITE_URL']}")
             print(f"📊 Hashtags: {len(selected_hashtags)}")
+            print(f"\n⚠️  If pin doesn't appear on Pinterest:")
+            print(f"1. Check IFTTT applet is enabled")
+            print(f"2. Verify Pinterest board is selected")
+            print(f"3. Confirm Value1={{Value1}}, Value2={{Value2}}, Value3={{Value3}}")
         else:
             print(f"\n❌ ERROR: {response.status_code}")
             print(f"Response: {response.text}")
