@@ -33,8 +33,8 @@ jobs:
     
     - name: Generate & Post Premium Wealth Content
       env:
-        IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
-        WEBSITE_URL: ${{ secrets.WEBSITE_URL }}
+        IFTTT_KEY: cUu4H4H-go1BkVlG-_mnnq
+        WEBSITE_URL: https://savetracker.site
       run: |
         python << 'EOF'
         import requests
@@ -485,7 +485,7 @@ jobs:
         # POST TO PINTEREST VIA IFTTT
         # ============================================
         
-        ifttt_url = f"https://maker.ifttt.com/trigger/pinterest_paylas/with/key/{os.environ['IFTTT_KEY']}"
+        ifttt_url = f"https://maker.ifttt.com/trigger/pinterest_post_save/with/key/{os.environ['IFTTT_KEY']}"
         
         payload = {
             "value1": image_url,
