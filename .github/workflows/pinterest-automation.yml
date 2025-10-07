@@ -2,9 +2,9 @@ name: Advanced Pinterest Wealth Automation
 
 on:
   schedule:
-    # Twice daily - Optimal times
-    - cron: '0 9 * * *'    # 12:00 PM Turkey Time
-    - cron: '0 15 * * *'   # 6:00 PM Turkey Time
+    # Once daily - Sustainable posting
+    - cron: '0 9 * * *'    # 12:00 PM Turkey Time (once per day)
+    # Removed second posting to avoid IFTTT rate limits
   workflow_dispatch:
   push:
     branches: [ main, master ]
