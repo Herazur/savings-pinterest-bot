@@ -455,16 +455,9 @@ jobs:
             
             description = f"{intro} {body} {cta}"
             
-            # HER ZAMAN website ekle (description'da)
-            website_adds = [
-                f"\n\n→ More at {os.environ['WEBSITE_URL']}",
-                f"\n\n🔗 {os.environ['WEBSITE_URL']}",
-                f"\n\nFree resources: {os.environ['WEBSITE_URL']}",
-                f"\n\nJoin us → {os.environ['WEBSITE_URL']}",
-                f"\n\nLearn more: {os.environ['WEBSITE_URL']}",
-                f"\n\n📌 Visit: {os.environ['WEBSITE_URL']}"
-            ]
-            description += random.choice(website_adds)
+            # Pinterest spam engeli nedeniyle link EKLENMİYOR
+            # Domain claim edildikten sonra tekrar aktif edilebilir
+            # Website trafiği için alternatif: Bio'da link, boards, profile
             
             # Hashtag stratejisi - çeşitli ve organik
             hashtag_sets = [
