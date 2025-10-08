@@ -455,15 +455,16 @@ jobs:
             
             description = f"{intro} {body} {cta}"
             
-            # Bazen website ekle (soft)
-            if random.random() < 0.6:  # %60 ihtimal
-                website_adds = [
-                    f"\n\n→ More at {os.environ['WEBSITE_URL']}",
-                    f"\n\n{os.environ['WEBSITE_URL']} 🔗",
-                    f"\n\nFree resources: {os.environ['WEBSITE_URL']}",
-                    f"\n\nJoin us → {os.environ['WEBSITE_URL']}"
-                ]
-                description += random.choice(website_adds)
+            # HER ZAMAN website ekle (description'da)
+            website_adds = [
+                f"\n\n→ More at {os.environ['WEBSITE_URL']}",
+                f"\n\n🔗 {os.environ['WEBSITE_URL']}",
+                f"\n\nFree resources: {os.environ['WEBSITE_URL']}",
+                f"\n\nJoin us → {os.environ['WEBSITE_URL']}",
+                f"\n\nLearn more: {os.environ['WEBSITE_URL']}",
+                f"\n\n📌 Visit: {os.environ['WEBSITE_URL']}"
+            ]
+            description += random.choice(website_adds)
             
             # Hashtag stratejisi - çeşitli ve organik
             hashtag_sets = [
