@@ -585,6 +585,7 @@ jobs:
                 # İçerik oluştur
                 title, description = generate_unique_content(category)
                 print(f"📌 Başlık: {title}")
+                print(f"📝 Description: {description[:80]}...")
                 
                 # IFTTT'ye gönder
                 success = send_to_pinterest(image_url, title, description)
@@ -611,9 +612,9 @@ jobs:
                 ifttt_url = f"https://maker.ifttt.com/trigger/{event_name}/with/key/{os.environ['IFTTT_KEY']}"
                 
                 payload = {
-                    "value1": image_url,
-                    "value2": title,
-                    "value3": ""  # Link boş - Pinterest spam engeli için
+                    "value1": image_url,      # Image URL
+                    "value2": title,          # Title
+                    "value3": description     # Description (link dahil)
                 }
                 
                 response = requests.post(ifttt_url, json=payload, timeout=30)
