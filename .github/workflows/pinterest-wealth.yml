@@ -30,7 +30,8 @@ jobs:
     
     - name: Ultra Diverse Pinterest Content
       env:
-        IFTTT_KEY: cUu4H4H-go1BkVlG-_mnnq
+        IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
+        IFTTT_EVENT: ${{ secrets.IFTTT_EVENT }}
         WEBSITE_URL: https://savetracker.site
         ACCOUNT_AGE_DAYS: 30  # Hesap yaşı (gün)
       run: |
@@ -602,31 +603,32 @@ jobs:
         def send_to_pinterest(image_url, title, description):
             """IFTTT üzerinden gönder"""
             
-            applets = ["pinterest_paylas", "pinterest_post_save"]
-            random.shuffle(applets)  # Sırayı karıştır
+            # Event name'i al
+            event_name = os.environ.get('IFTTT_EVENT', 'pinterest_paylas')
             
-            for applet in applets:
-                try:
-                    ifttt_url = f"https://maker.ifttt.com/trigger/{applet}/with/key/{os.environ['IFTTT_KEY']}"
+            try:
+                ifttt_url = f"https://maker.ifttt.com/trigger/{event_name}/with/key/{os.environ['IFTTT_KEY']}"
+                
+                payload = {
+                    "value1": image_url,
+                    "value2": title,
+                    "value3": ""  # Link boş - Pinterest spam engeli için
+                }
+                
+                response = requests.post(ifttt_url, json=payload, timeout=30)
+                
+                if response.status_code == 200:
+                    return True
+                elif "usage limit" in response.text.lower():
+                    print(f"⚠️ {event_name} limit aşımı")
+                    return False
+                else:
+                    print(f"❌ HTTP {response.status_code}: {response.text[:100]}")
+                    return False
                     
-                    payload = {
-                        "value1": image_url,
-                        "value2": title,
-                        "value3": description
-                    }
-                    
-                    response = requests.post(ifttt_url, json=payload, timeout=30)
-                    
-                    if response.status_code == 200:
-                        return True
-                    elif "usage limit" in response.text.lower():
-                        print(f"⚠️ {applet} limit aşımı")
-                        continue
-                        
-                except Exception as e:
-                    print(f"❌ Hata: {str(e)[:100]}")
-            
-            return False
+            except Exception as e:
+                print(f"❌ Hata: {str(e)[:100]}")
+                return False
 
         # ============================================
         # LOG SİSTEMİ
@@ -654,6 +656,7 @@ jobs:
             print("🚀 ADVANCED PINTEREST DIVERSITY ENGINE")
             print(f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             print(f"🌐 Website: {os.environ['WEBSITE_URL']}")
+            print(f"🔑 Event: {os.environ.get('IFTTT_EVENT', 'pinterest_paylas')}")
             print("=" * 60)
             
             # Rastgele başlangıç gecikmesi (5-30 saniye)
@@ -683,4 +686,5 @@ jobs:
         echo "📌 Çeşitlilik maksimumda"
         echo "🔒 Güvenlik önlemleri aktif"
         echo "📈 Hesap sağlığı korunuyor"
+        echo "🎯 Event: ${{ secrets.IFTTT_EVENT }}"
         echo "================================"
