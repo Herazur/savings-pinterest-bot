@@ -38,7 +38,7 @@ jobs:
       env:
         IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
         IFTTT_EVENT: ${{ secrets.IFTTT_EVENT }}
-        WEBSITE_URL: ${{ secrets.WEBSITE_URL }}
+        WEBSITE_URL: https://savetracker.site/
         ACCOUNT_AGE_DAYS: 30
         STATE_DIR: .pinterest_state
       run: |
