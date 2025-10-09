@@ -282,61 +282,34 @@ jobs:
             return prompt, category
 
         def generate_unique_content(category):
-            # Tasarruf temalı başlıklar ve açıklamalar
+            # Kısa ve çarpıcı başlıklar (Pinterest'te daha iyi çalışır)
             titles = [
                 "Money Saving Tip 💰",
-                "Financial Freedom Journey ✨",
-                "Savings Goal Inspiration 🎯",
-                "Smart Money Moves 💡",
-                "Budget Beauty 🌟",
-                "Wealth Building Vibes 📈",
-                "Saving Made Simple 💚",
+                "Financial Freedom ✨",
+                "Savings Goal 🎯",
+                "Smart Money 💡",
+                "Budget Goals 🌟",
+                "Wealth Building 📈",
+                "Save Money 💚",
                 "Financial Wellness ☘️"
             ]
             
-            intros = [
-                "Start small, dream big:",
-                "Your future self will thank you:",
-                "Small steps to big savings:",
-                "Building wealth one day at a time:",
-                "Financial freedom starts here:"
-            ]
-            
-            bodies = [
-                "Every coin you save today is a brick in your dream house tomorrow.",
-                "The secret to wealth? Consistency over time.",
-                "Saving isn't about depriving yourself, it's about prioritizing your future.",
-                "Your savings account is your peace of mind fund.",
-                "Small daily savings create massive long-term results."
-            ]
-            
-            ctas = [
-                "What are you saving for? 💭",
-                "Start your journey today! 🚀",
-                "Double tap if you're saving too! 💚",
-                "Tag someone who needs to see this 👇",
-                "Follow for more money tips! ✨"
+            # IFTTT için daha kısa açıklamalar
+            descriptions = [
+                "Start small, dream big! 💭 #moneysavingtips #financialfreedom",
+                "Every coin counts towards your goals 🎯 #budgeting #savingmoney",
+                "Building wealth one day at a time 📈 #financialliteracy #moneygoals",
+                "Your future self will thank you! ✨ #personalfinance #smartmoney",
+                "Small steps to big savings 💚 #financetips #wealthbuilding",
+                "Save today, celebrate tomorrow 🎉 #budgetingtips #savingsgoals",
+                "Financial freedom starts here! 🚀 #moneytips #financialwellness",
+                "Consistency is the secret 💪 #moneymindset #savingsplan"
             ]
             
             title = random.choice(titles)
-            intro = random.choice(intros)
-            body = random.choice(bodies)
-            cta = random.choice(ctas)
+            description = random.choice(descriptions)
             
-            description = f"{intro} {body} {cta}"
-            
-            # Link artık description'da değil, source URL olarak
-            # if WEBSITE_URL:
-            #     description += f"\n\n→ More tips: {WEBSITE_URL}"
-            
-            hashtags = random.choice([
-                "#moneysavingtips #financialfreedom #budgeting #wealthbuilding",
-                "#savingmoney #financialliteracy #moneygoals #personalfinance",
-                "#financetips #moneymindset #savingsgoals #smartmoney",
-                "#budgetingtips #financialwellness #moneytips #savingsplan"
-            ])
-            
-            return title, description + "\n\n" + hashtags
+            return title, description
 
         def create_diverse_image(prompt):
             encoded = urllib.parse.quote(prompt)
@@ -356,10 +329,10 @@ jobs:
         def send_to_pinterest(image_url, title, description, source_url=None):
             event_name = IFTTT_EVENT
             ifttt_url = f"https://maker.ifttt.com/trigger/{event_name}/with/key/{IFTTT_KEY}"
-            # value1: image, value2: description, value3: link (source URL)
+            # value1: image, value2: title (kısa), value3: link
             payload = {
                 "value1": image_url, 
-                "value2": f"{title}\n\n{description}",
+                "value2": title,  # Sadece başlık (kısa)
                 "value3": source_url or WEBSITE_URL or ""
             }
             
