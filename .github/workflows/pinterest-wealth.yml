@@ -325,8 +325,9 @@ jobs:
             
             description = f"{intro} {body} {cta}"
             
-            if WEBSITE_URL:
-                description += f"\n\n→ More tips: {WEBSITE_URL}"
+            # Link artık description'da değil, source URL olarak
+            # if WEBSITE_URL:
+            #     description += f"\n\n→ More tips: {WEBSITE_URL}"
             
             hashtags = random.choice([
                 "#moneysavingtips #financialfreedom #budgeting #wealthbuilding",
@@ -352,10 +353,15 @@ jobs:
             
             return image_url, super_seed
 
-        def send_to_pinterest(image_url, title, description):
+        def send_to_pinterest(image_url, title, description, source_url=None):
             event_name = IFTTT_EVENT
             ifttt_url = f"https://maker.ifttt.com/trigger/{event_name}/with/key/{IFTTT_KEY}"
-            payload = {"value1": image_url, "value2": title, "value3": description}
+            # value1: image, value2: description, value3: link (source URL)
+            payload = {
+                "value1": image_url, 
+                "value2": f"{title}\n\n{description}",
+                "value3": source_url or WEBSITE_URL or ""
+            }
             
             for attempt in range(4):
                 try:
