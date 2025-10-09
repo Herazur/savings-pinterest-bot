@@ -14,7 +14,6 @@ on:
 jobs:
   pinterest-diverse:
     runs-on: ubuntu-latest
-    # Kısa ve kesin bir job timeout. Uzun beklemeler runner maliyetini ve hataları artırır.
     timeout-minutes: 30
 
     steps:
@@ -40,19 +39,15 @@ jobs:
         IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
         IFTTT_EVENT: ${{ secrets.IFTTT_EVENT }}
         WEBSITE_URL: ${{ secrets.WEBSITE_URL }}
-        ACCOUNT_AGE_DAYS: 30  # Hesap yaşı (gün) — gerekirse secret olarak saklayın
+        ACCOUNT_AGE_DAYS: 30
         STATE_DIR: .pinterest_state
       run: |
         set -euo pipefail
         python << 'PY'
         # -*- coding: utf-8 -*-
         """
-        Geliştirilmiş: Daha güvenli, daha dayanıklı ve runner dostu.
-        - requests.Session + retry
-        - IFTTT retry/backoff
-        - state (posted prompts) persist: .pinterest_state/posted.json
-        - kısaltılmış beklemeler (runner timeout uyumlu)
-        - kritik hatalarda temiz log ve non-zero exit
+        Pinterest için optimize edilmiş, text'siz, yüksek kaliteli görsel promptları
+        Saving/tasarruf temasına odaklanmış
         """
         import os
         import sys
@@ -71,7 +66,6 @@ jobs:
         STATE_DIR.mkdir(parents=True, exist_ok=True)
         POSTED_FILE = STATE_DIR / 'posted.json'
 
-        # --------- Helper: persistent posted prompts (simple file-based state) ---------
         def load_posted():
             if POSTED_FILE.exists():
                 try:
@@ -86,7 +80,6 @@ jobs:
             except Exception as e:
                 print(f"⚠️ State save failed: {e}")
 
-        # --------- HTTP session with retries ---------
         def create_session(retries=3, backoff_factor=0.6, status_forcelist=(500,502,503,504)):
             s = requests.Session()
             retry = Retry(
@@ -105,7 +98,6 @@ jobs:
 
         session = create_session()
 
-        # --------- Basic config checks ---------
         IFTTT_KEY = os.environ.get('IFTTT_KEY')
         IFTTT_EVENT = os.environ.get('IFTTT_EVENT') or 'pinterest_paylas'
         WEBSITE_URL = os.environ.get('WEBSITE_URL', '').strip()
@@ -117,7 +109,6 @@ jobs:
         if not WEBSITE_URL:
             print('⚠️ WEBSITE_URL yok. Devam ediyoruz ama description içinde link olmayacak.')
 
-        # --------- Safe pin count (aynı mantık, ancak runner uyumlu beklemeler) ---------
         def calculate_safe_pin_count():
             account_age = int(os.environ.get('ACCOUNT_AGE_DAYS', 1))
             if account_age < 7:
@@ -140,22 +131,132 @@ jobs:
             pins_this_run = min(remaining_pins, random.randint(1, 3))
             return pins_this_run
 
-        # --------- Simplified content library (or keep your full library) ---------
+        # YENİ: Pinterest'te viral olan, text'siz, kaliteli görsel promptları
         mega_content_library = {
-            # (kısaltıldı — gerçek kullanımda orijinali kullanın)
-            "morning_motivation": {"themes": ["sunrise over mountains with inspirational quote space"], "styles":["energizing"], "moods":["determined"]},
-            "financial_education": {"themes": ["clean desk with budget planner and colorful charts"], "styles":["educational"], "moods":["helpful"]},
-            "luxury_lifestyle": {"themes": ["modern minimalist mansion with infinity pool overlooking city skyline at golden hour"], "styles":["luxurious"], "moods":["inspiring"]}
+            "piggy_bank_aesthetic": {
+                "themes": [
+                    "ceramic piggy bank surrounded by gold coins on marble surface",
+                    "pink ceramic piggy bank with scattered coins in soft natural light",
+                    "vintage glass jar filled with coins and dollar bills",
+                    "elegant piggy bank on wooden desk with green plants",
+                    "modern white piggy bank with eucalyptus leaves decoration"
+                ],
+                "styles": ["minimalist", "aesthetic", "cozy"],
+                "moods": ["calm", "hopeful", "inspiring"]
+            },
+            "money_jar_goals": {
+                "themes": [
+                    "mason jar filled with rolled money and coins with soft bokeh background",
+                    "glass savings jar overflowing with paper money on rustic wooden table",
+                    "transparent jar with coins stacked inside on white background",
+                    "vintage savings jar with ribbon tied around neck filled with cash",
+                    "multiple glass jars with different amounts of money on shelf"
+                ],
+                "styles": ["rustic", "clean", "organic"],
+                "moods": ["motivating", "positive", "warm"]
+            },
+            "coin_stacking_wealth": {
+                "themes": [
+                    "perfectly stacked coins creating ascending towers on dark surface",
+                    "gold and silver coins arranged in growing stacks",
+                    "coins stacked in pyramid formation with blurred background",
+                    "ascending coin stacks with plant growing from top stack",
+                    "multiple coin towers of different heights on marble surface"
+                ],
+                "styles": ["elegant", "professional", "symbolic"],
+                "moods": ["ambitious", "determined", "focused"]
+            },
+            "wallet_minimalism": {
+                "themes": [
+                    "sleek leather wallet with cash peeking out on clean background",
+                    "minimalist wallet with credit cards on marble table",
+                    "open wallet showing organized bills and cards flat lay",
+                    "brown leather wallet with green plant leaves beside it",
+                    "modern minimalist wallet on white surface with shadow"
+                ],
+                "styles": ["minimalist", "modern", "clean"],
+                "moods": ["organized", "sophisticated", "simple"]
+            },
+            "cash_envelope_system": {
+                "themes": [
+                    "pastel colored envelopes with cash visible inside arranged neatly",
+                    "kraft paper envelopes filled with money in organized row",
+                    "white envelopes with different amounts of cash on wooden surface",
+                    "colorful labeled envelopes for budget categories flat lay",
+                    "vintage style envelopes with money on marble countertop"
+                ],
+                "styles": ["organized", "aesthetic", "practical"],
+                "moods": ["systematic", "neat", "empowering"]
+            },
+            "plant_growth_metaphor": {
+                "themes": [
+                    "small plant growing from pile of coins in sunlight",
+                    "money tree with coins as leaves in modern pot",
+                    "succulent plant in pot surrounded by scattered coins",
+                    "young plant sprouting with coins buried in soil",
+                    "green plant growing through stack of money bills"
+                ],
+                "styles": ["symbolic", "natural", "hopeful"],
+                "moods": ["growth-focused", "optimistic", "inspiring"]
+            },
+            "luxury_lifestyle_goals": {
+                "themes": [
+                    "champagne glass with gold coins on marble surface",
+                    "luxury watch on velvet cushion with soft lighting",
+                    "designer handbag with jewelry on elegant vanity",
+                    "keys to luxury car on marble table with flowers",
+                    "passport with international currency and travel items"
+                ],
+                "styles": ["luxurious", "aspirational", "elegant"],
+                "moods": ["dreamy", "motivating", "sophisticated"]
+            },
+            "financial_flat_lay": {
+                "themes": [
+                    "flat lay of cash, calculator, and coffee cup on white background",
+                    "money, phone, and minimal accessories arranged aesthetically",
+                    "bills and coins arranged in circular pattern from above",
+                    "cash spread out with gold accessories on marble surface",
+                    "money with fresh flowers and jewelry organized flat lay"
+                ],
+                "styles": ["aesthetic", "organized", "modern"],
+                "moods": ["inspiring", "clean", "focused"]
+            }
         }
 
         visual_variations = {
-            'color_palettes': ['warm golden tones with cream and beige','cool blues with white and silver accents'],
-            'lighting_styles': ['soft morning light through window','golden hour warm side lighting'],
-            'compositions': ['rule of thirds balanced layout','centered symmetrical composition'],
-            'textures': ['smooth marble surfaces','soft fabric textures']
+            'color_palettes': [
+                'soft pastels with cream and white',
+                'warm earth tones with beige and brown',
+                'minimalist white with gold accents',
+                'sage green with natural wood tones',
+                'blush pink with marble and gold',
+                'navy blue with silver accents',
+                'neutral grays with pops of green'
+            ],
+            'lighting_styles': [
+                'soft natural window light from left',
+                'golden hour warm glow',
+                'bright even daylight',
+                'soft diffused overhead lighting',
+                'dramatic side lighting with shadows',
+                'backlit with gentle rim light'
+            ],
+            'compositions': [
+                'centered symmetrical layout',
+                'rule of thirds balanced composition',
+                'flat lay from directly above',
+                'slight overhead angle showing depth',
+                'diagonal arrangement creating movement'
+            ],
+            'textures': [
+                'smooth marble surface',
+                'rustic wooden table',
+                'soft linen fabric background',
+                'clean white backdrop',
+                'natural stone texture'
+            ]
         }
 
-        # --------- Prompt generator (keeps original randomness) ---------
         def generate_unique_prompt():
             category = random.choice(list(mega_content_library.keys()))
             content = mega_content_library[category]
@@ -166,47 +267,101 @@ jobs:
             texture = random.choice(visual_variations['textures'])
             style = random.choice(content['styles'])
             mood = random.choice(content['moods'])
-            time_of_day = random.choice(['early morning','midday','afternoon','golden hour','blue hour'])
-            weather = random.choice(['clear sky','soft clouds'])
-            season = random.choice(['spring','summer','autumn','winter'])
-            prompt = f"{theme}, {color}, {lighting}, {composition}, {style} style, {mood} mood, {time_of_day}, {random.choice(['high quality','8k resolution','professional photography'])}, no text, no watermarks, vertical format"
+            
+            quality_boosters = [
+                'professional photography',
+                'high resolution 8k',
+                'sharp focus',
+                'studio quality',
+                'pinterest aesthetic'
+            ]
+            
+            # TEXT OLMASIN diye özel vurgu
+            prompt = f"{theme}, {color}, {lighting}, {composition}, {texture}, {style} style, {mood} mood, {random.choice(quality_boosters)}, no text, no words, no letters, no numbers visible, no watermarks, vertical pinterest format, clean aesthetic"
+            
             return prompt, category
 
         def generate_unique_content(category):
-            title = f"Tip of the Day #{random.randint(1,999)} 💡"
-            intro = random.choice(["Here's something I learned today:", "Reminder for myself (and you):"]) 
-            body = random.choice(["Every small step counts towards your bigger goals.", "Consistency beats perfection every single time."])
-            cta = random.choice(["What's your goal today?","Share with someone who needs this."])
+            # Tasarruf temalı başlıklar ve açıklamalar
+            titles = [
+                "Money Saving Tip 💰",
+                "Financial Freedom Journey ✨",
+                "Savings Goal Inspiration 🎯",
+                "Smart Money Moves 💡",
+                "Budget Beauty 🌟",
+                "Wealth Building Vibes 📈",
+                "Saving Made Simple 💚",
+                "Financial Wellness ☘️"
+            ]
+            
+            intros = [
+                "Start small, dream big:",
+                "Your future self will thank you:",
+                "Small steps to big savings:",
+                "Building wealth one day at a time:",
+                "Financial freedom starts here:"
+            ]
+            
+            bodies = [
+                "Every coin you save today is a brick in your dream house tomorrow.",
+                "The secret to wealth? Consistency over time.",
+                "Saving isn't about depriving yourself, it's about prioritizing your future.",
+                "Your savings account is your peace of mind fund.",
+                "Small daily savings create massive long-term results."
+            ]
+            
+            ctas = [
+                "What are you saving for? 💭",
+                "Start your journey today! 🚀",
+                "Double tap if you're saving too! 💚",
+                "Tag someone who needs to see this 👇",
+                "Follow for more money tips! ✨"
+            ]
+            
+            title = random.choice(titles)
+            intro = random.choice(intros)
+            body = random.choice(bodies)
+            cta = random.choice(ctas)
+            
             description = f"{intro} {body} {cta}"
+            
             if WEBSITE_URL:
-                description += f"\n\n→ More at {WEBSITE_URL}"
-            hashtags = "#motivation #inspiration #goals"
+                description += f"\n\n→ More tips: {WEBSITE_URL}"
+            
+            hashtags = random.choice([
+                "#moneysavingtips #financialfreedom #budgeting #wealthbuilding",
+                "#savingmoney #financialliteracy #moneygoals #personalfinance",
+                "#financetips #moneymindset #savingsgoals #smartmoney",
+                "#budgetingtips #financialwellness #moneytips #savingsplan"
+            ])
+            
             return title, description + "\n\n" + hashtags
 
-        # --------- Image generation (external service) ---------
         def create_diverse_image(prompt):
-            # Pollinations kullandınız; 3rd-party endpoint'ler değişken olabilir.
             encoded = urllib.parse.quote(prompt)
             timestamp = int(datetime.now().timestamp() * 1000)
             random_component = random.randint(1, 999999999)
             prompt_hash = abs(hash(prompt))
             super_seed = (timestamp + random_component + prompt_hash) % 100000000
-            size = random.choice([(1000,1500),(1080,1620),(800,1200)])
-            image_url = f"https://image.pollinations.ai/prompt/{encoded}?width={size[0]}&height={size[1]}&seed={super_seed}&nologo=true&enhance=true"
+            
+            # Pinterest için optimal boyutlar
+            size = random.choice([(1000,1500),(1080,1620),(1000,1400)])
+            
+            # Model parametresi ekleyelim (nano-banana yerine başka model deneyin)
+            image_url = f"https://image.pollinations.ai/prompt/{encoded}?width={size[0]}&height={size[1]}&seed={super_seed}&nologo=true&enhance=true&model=flux"
+            
             return image_url, super_seed
 
-        # --------- Send to IFTTT with backoff ---------
         def send_to_pinterest(image_url, title, description):
             event_name = IFTTT_EVENT
             ifttt_url = f"https://maker.ifttt.com/trigger/{event_name}/with/key/{IFTTT_KEY}"
             payload = {"value1": image_url, "value2": title, "value3": description}
-            # exponential backoff retries
+            
             for attempt in range(4):
                 try:
                     r = session.post(ifttt_url, json=payload, timeout=20)
                     if r.status_code == 200:
                         return True
-                    # detect rate-limit-ish messages
                     text = (r.text or '').lower()
                     if 'limit' in text or r.status_code in (429, 503):
                         sleep = (2 ** attempt) + random.random()
@@ -235,12 +390,13 @@ jobs:
                 print('📌 Bugünlük limit dolu veya 0 pin. Çıkılıyor.')
                 return
             print(f"🎯 Bu çalıştırmada paylaşılacak pin sayısı: {pins_to_post}")
+            
             for i in range(pins_to_post):
-                # kısa, runner-dostu rastgele bekleme
                 if i > 0:
                     wait_time = random.uniform(3, 12)
-                    print(f"⏳ {wait_time:.1f}s bekleniyor (bot davranışı simülasyonu)")
+                    print(f"⏳ {wait_time:.1f}s bekleniyor")
                     time.sleep(wait_time)
+                
                 attempt = 0
                 prompt = None
                 while attempt < 8:
@@ -250,20 +406,25 @@ jobs:
                         posted.add(checksum)
                         break
                     attempt += 1
+                
                 if not prompt:
                     print('🔁 Benzersiz prompt bulunamadı, atlanıyor.')
                     continue
+                
                 print(f"📂 Kategori: {category} | Prompt checksum: {checksum[:8]}")
                 image_url, seed = create_diverse_image(prompt)
                 title, description = generate_unique_content(category)
+                
                 success = send_to_pinterest(image_url, title, description)
                 entry = {"timestamp": datetime.now().isoformat(), "category": category, "seed": seed, "success": success}
                 log_pin(entry)
+                
                 print(f"✅ Pin {'başarılı' if success else 'başarısız'}: {title}")
+            
             save_posted(posted)
 
         def main():
-            print('=== ADVANCED PINTEREST DIVERSITY ENGINE - improved ===')
+            print('=== PINTEREST SAVINGS CONTENT ENGINE ===')
             print(datetime.now().isoformat())
             smart_posting_system()
             print('=== İŞLEM TAMAMLANDI ===')
@@ -286,10 +447,9 @@ jobs:
         echo "📊 PINTEREST AUTOMATION REPORT"
         echo "================================"
         echo "✅ Görev tamamlandı"
-        echo "📌 Çeşitlilik maksimize edildi (yine de sınırlarla)"
-        echo "🔒 Güvenlik önlemleri: IFTTT key kullanıldı, secrets kullanıldı"
-        echo "📈 Hesap sağlığı korunuyor (günlük limit kontrolü)"
-        echo "🎯 Event: ${{ secrets.IFTTT_EVENT }}"
+        echo "💰 Tasarruf temalı içerikler oluşturuldu"
+        echo "🎨 Text'siz, kaliteli görseller"
+        echo "📈 Hesap sağlığı korunuyor"
         echo "================================"
 
     - name: Failure report
