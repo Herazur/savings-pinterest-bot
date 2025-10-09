@@ -282,7 +282,7 @@ jobs:
             return prompt, category
 
         def generate_unique_content(category):
-            # Kısa ve çarpıcı başlıklar (Pinterest'te daha iyi çalışır)
+            # Çeşitli başlıklar
             titles = [
                 "Money Saving Tip 💰",
                 "Financial Freedom ✨",
@@ -291,49 +291,110 @@ jobs:
                 "Budget Goals 🌟",
                 "Wealth Building 📈",
                 "Save Money 💚",
-                "Financial Wellness ☘️"
+                "Financial Wellness ☘️",
+                "Money Matters 💵",
+                "Financial Success 🏆",
+                "Saving Strategy 🧠",
+                "Money Management 📊"
             ]
             
-            # IFTTT için daha kısa açıklamalar
-            descriptions = [
-                "Start small, dream big! 💭 #moneysavingtips #financialfreedom",
-                "Every coin counts towards your goals 🎯 #budgeting #savingmoney",
-                "Building wealth one day at a time 📈 #financialliteracy #moneygoals",
-                "Your future self will thank you! ✨ #personalfinance #smartmoney",
-                "Small steps to big savings 💚 #financetips #wealthbuilding",
-                "Save today, celebrate tomorrow 🎉 #budgetingtips #savingsgoals",
-                "Financial freedom starts here! 🚀 #moneytips #financialwellness",
-                "Consistency is the secret 💪 #moneymindset #savingsplan"
+            # Daha uzun ve çeşitli açıklamalar
+            intros = [
+                "💭 Quick tip:",
+                "✨ Did you know?",
+                "🎯 Pro tip:",
+                "💡 Money wisdom:",
+                "🌟 Remember:",
+                "📈 Success tip:",
+                "💚 Daily reminder:",
+                "⚡ Financial hack:"
+            ]
+            
+            bodies = [
+                "Every small amount you save today builds your financial security for tomorrow.",
+                "Consistency in saving beats perfection every single time - start with what you can.",
+                "Your savings account isn't just money, it's your peace of mind and future opportunities.",
+                "The secret to building wealth? Small daily habits that compound over time.",
+                "Saving money isn't about restriction, it's about creating the life you want.",
+                "Financial freedom starts with the decision to save even when it feels small.",
+                "Every dollar saved is a vote for your future self and your dreams.",
+                "Building wealth is a marathon, not a sprint - celebrate every small win.",
+                "Your financial journey is unique - compare yourself only to your past self.",
+                "Smart money management today creates endless possibilities tomorrow.",
+                "Saving is self-care for your future - you deserve financial stability.",
+                "Small sacrifices today lead to big celebrations in your future."
+            ]
+            
+            ctas = [
+                "What's your savings goal?",
+                "Start your journey today!",
+                "Double tap if saving!",
+                "Share this with a friend",
+                "Follow for more tips",
+                "Comment your goal below",
+                "Save this for later",
+                "Tag someone who needs this"
+            ]
+            
+            hashtags_list = [
+                "#moneysavingtips #financialfreedom #budgeting #personalfinance",
+                "#savingmoney #financialliteracy #moneygoals #wealthbuilding",
+                "#financetips #moneymindset #savingsgoals #smartmoney",
+                "#budgetingtips #financialwellness #moneytips #savingsplan",
+                "#moneymanagement #financialsuccess #savingsmotivation #moneymatters",
+                "#financialindependence #moneysaver #budgetlife #wealthmindset"
             ]
             
             title = random.choice(titles)
-            description = random.choice(descriptions)
+            intro = random.choice(intros)
+            body = random.choice(bodies)
+            cta = random.choice(ctas)
+            hashtags = random.choice(hashtags_list)
+            
+            # Uzun description (link + hashtag dahil)
+            description = f"{intro} {body} {cta}\n\n💻 More tips: {WEBSITE_URL}\n\n{hashtags}"
             
             return title, description
 
         def create_diverse_image(prompt):
             encoded = urllib.parse.quote(prompt)
             timestamp = int(datetime.now().timestamp() * 1000)
-            random_component = random.randint(1, 999999999)
-            prompt_hash = abs(hash(prompt))
-            super_seed = (timestamp + random_component + prompt_hash) % 100000000
             
-            # Pinterest için optimal boyutlar
-            size = random.choice([(1000,1500),(1080,1620),(1000,1400)])
+            # ÇOK DAHA FAZLA rastgelelik için:
+            random_component = random.randint(100000, 999999999)
+            noise_factor = random.randint(1, 1000000)
+            micro_timestamp = int(datetime.now().microsecond)
             
-            # Model parametresi ekleyelim (nano-banana yerine başka model deneyin)
-            image_url = f"https://image.pollinations.ai/prompt/{encoded}?width={size[0]}&height={size[1]}&seed={super_seed}&nologo=true&enhance=true&model=flux"
+            prompt_hash = abs(hash(prompt + str(random_component)))
+            
+            # Mega seed kombinasyonu - her çalıştırmada farklı
+            super_seed = (timestamp * random_component + noise_factor + micro_timestamp + prompt_hash) % 2147483647
+            
+            # Daha fazla boyut çeşitliliği
+            size = random.choice([
+                (1000, 1500), (1080, 1620), (1000, 1400),
+                (1080, 1350), (1000, 1600), (1200, 1800),
+                (800, 1200), (900, 1350), (1000, 1250)
+            ])
+            
+            # Model parametresi ile (nano-banana yerine flux veya turbo)
+            model = random.choice(['flux', 'flux-realism', 'flux-anime', 'flux-3d'])
+            
+            image_url = f"https://image.pollinations.ai/prompt/{encoded}?width={size[0]}&height={size[1]}&seed={super_seed}&nologo=true&enhance=true&model={model}"
             
             return image_url, super_seed
 
-        def send_to_pinterest(image_url, title, description, source_url=None):
+        def send_to_pinterest(image_url, title, description):
             event_name = IFTTT_EVENT
             ifttt_url = f"https://maker.ifttt.com/trigger/{event_name}/with/key/{IFTTT_KEY}"
-            # value1: image, value2: title (kısa), value3: link
+            # IFTTT Pinterest mapping:
+            # Value1 = Image URL
+            # Value2 = Title
+            # Value3 = Description
             payload = {
-                "value1": image_url, 
-                "value2": title,  # Sadece başlık (kısa)
-                "value3": source_url or WEBSITE_URL or ""
+                "value1": image_url,      # Image URL
+                "value2": title,          # Title (kısa başlık)
+                "value3": description     # Description (uzun açıklama + link + hashtag)
             }
             
             for attempt in range(4):
