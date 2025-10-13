@@ -33,6 +33,7 @@ jobs:
     - name: Create workspace for state
       run: |
         mkdir -p .pinterest_state
+        echo "State directory created at $(date)" > .pinterest_state/.init
 
     - name: Ultra Diverse Pinterest Content (script)
       env:
@@ -501,15 +502,18 @@ jobs:
         def log_pin(entry):
             LOG_FILE = STATE_DIR / 'run.log'
             try:
-                LOG_FILE.write_text((LOG_FILE.read_text() if LOG_FILE.exists() else '') + json.dumps(entry) + '\n')
-            except Exception:
-                pass
+                with open(LOG_FILE, 'a') as f:
+                    f.write(json.dumps(entry) + '\n')
+            except Exception as e:
+                print(f"⚠️ Log write failed: {e}")
 
         def smart_posting_system():
             posted = load_posted()
             pins_to_post = calculate_safe_pin_count()
             if pins_to_post == 0:
                 print('📌 Bugünlük limit dolu veya 0 pin. Çıkılıyor.')
+                # Boş dosya oluştur ki artifact upload başarılı olsun
+                (STATE_DIR / 'no_pins_posted.txt').write_text(f"No pins posted at {datetime.now().isoformat()}")
                 return
             print(f"🎯 Bu çalıştırmada paylaşılacak pin sayısı: {pins_to_post}")
             
@@ -544,6 +548,14 @@ jobs:
                 print(f"✅ Pin {'başarılı' if success else 'başarısız'}: {title}")
             
             save_posted(posted)
+            
+            # Summary dosyası oluştur
+            summary = {
+                "run_time": datetime.now().isoformat(),
+                "pins_posted": pins_to_post,
+                "total_tracked": len(posted)
+            }
+            (STATE_DIR / 'summary.json').write_text(json.dumps(summary, indent=2))
 
         def main():
             print('=== PINTEREST VIRAL TEXT CONTENT ENGINE ===')
@@ -560,7 +572,8 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: pinterest-state-and-logs
-        path: .pinterest_state
+        path: .pinterest_state/
+        if-no-files-found: warn
 
     - name: Summary Report
       if: success()
@@ -574,6 +587,10 @@ jobs:
         echo "📈 Hesap sağlığı korunuyor"
         echo "🔥 Viral potansiyeli yüksek"
         echo "================================"
+        if [ -f .pinterest_state/summary.json ]; then
+          echo "📄 Run Summary:"
+          cat .pinterest_state/summary.json
+        fi
 
     - name: Failure report
       if: failure()
