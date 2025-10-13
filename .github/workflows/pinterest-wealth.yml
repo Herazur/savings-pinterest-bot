@@ -1,501 +1,261 @@
-name: Advanced Pinterest Diversity Engine (improved)
+# -*- coding: utf-8 -*-
+"""
+Pinterest için ULTRA VİRAL, dikkat çekici, yüksek engagement garantili promptlar
+Saving/tasarruf teması + Pinterest algoritmasına optimize
+"""
 
-on:
-  schedule:
-    # Cron zamanları GITHub Actions için UTC'dir. Aşağıdaki yorumlar Istanbul (+03:00) saatine göre verilmiştir.
-    - cron: '0 8 * * *'   # 11:00 (sabah gönderisi)
-    - cron: '0 15 * * *'  # 18:00 (akşam gönderisi)
-    - cron: '8 11 * * 5'     # Cuma 14:08
-    - cron: '35 16 * * 6'    # Cumartesi 19:35
-  workflow_dispatch:
-  push:
-    branches: [ main ]
+mega_content_library = {
+    "aesthetic_money_shots": {
+        "themes": [
+            "hundreds of gold coins cascading like waterfall onto pristine white marble, cinematic lighting, ultra detailed macro photography",
+            "transparent glass piggy bank exploding with rainbow colored bills, dramatic motion freeze, professional studio lighting",
+            "luxury wallet overflowing with crisp hundred dollar bills surrounded by fresh white roses and pearls on silk fabric",
+            "giant stack of bundled cash creating dramatic tower against moody dark background with dramatic side lighting",
+            "aesthetically arranged colorful cash envelopes in perfect gradient from pink to purple, overhead flat lay with morning light"
+        ],
+        "styles": ["hyper-realistic", "cinematic", "magazine-quality"],
+        "moods": ["aspirational", "luxurious", "dream-like"]
+    },
+    
+    "viral_piggy_bank_concepts": {
+        "themes": [
+            "oversized ceramic piggy bank in millennial pink surrounded by scattered gold coins and eucalyptus leaves, soft dreamy lighting",
+            "crystal clear glass piggy bank filled with glowing golden coins, magical bokeh lights in background, fairy tale aesthetic",
+            "minimalist white piggy bank on floating shelf with trailing pothos plants, scandinavian interior aesthetic, natural window light",
+            "vintage brass piggy bank covered in morning dew drops with wildflowers, cottagecore aesthetic, golden hour glow",
+            "modern geometric piggy bank in sage green with gold accents on marble vanity, luxury lifestyle flat lay"
+        ],
+        "styles": ["dreamy", "instagram-aesthetic", "pinterest-perfect"],
+        "moods": ["cozy", "inspiring", "attainable-luxury"]
+    },
+    
+    "money_jar_magic": {
+        "themes": [
+            "mason jar bursting with rolled hundred dollar bills tied with silk ribbon, surrounded by fresh lavender and gold jewelry",
+            "vintage apothecary jar overflowing with international currency notes, antique wooden table, dramatic chiaroscuro lighting",
+            "crystal clear jar filled with perfectly stacked gold coins creating mesmerizing pattern, macro photography, studio lighting",
+            "multiple gradient colored jars labeled for different savings goals, aesthetic workspace setup, motivational setup",
+            "enormous glass jar filled with colorful bills creating rainbow effect, lifestyle photography, bright airy aesthetic"
+        ],
+        "styles": ["editorial", "lifestyle", "aspirational"],
+        "moods": ["motivated", "organized", "goal-oriented"]
+    },
+    
+    "luxury_wealth_visualization": {
+        "themes": [
+            "designer handbag spilling with cash and credit cards on marble bathroom counter with candles, luxury lifestyle aesthetic",
+            "gold jewelry scattered among hundred dollar bills on velvet cushion, dramatic jewelry photography lighting",
+            "luxury car keys on pile of cash with champagne glass, lifestyle goals aesthetic, moody dramatic lighting",
+            "first class plane tickets surrounded by international currency and passport, travel goals flat lay, wanderlust aesthetic",
+            "designer shopping bags filled with tissue paper and cash peeking out, luxury retail therapy aesthetic, bright clean lighting"
+        ],
+        "styles": ["aspirational", "editorial-luxury", "lifestyle-magazine"],
+        "moods": ["dreamy", "motivational", "success-driven"]
+    },
+    
+    "coin_stacking_perfection": {
+        "themes": [
+            "perfectly symmetrical towers of gleaming coins creating ascending staircase, mirror reflection, architectural photography style",
+            "golden coins stacked in fibonacci spiral pattern on black marble, mathematical beauty, dramatic top lighting",
+            "coins arranged in perfect circular mandala pattern with small succulent in center, zen aesthetic, natural light",
+            "multiple coin towers of varying heights creating city skyline silhouette at sunset, creative conceptual photography",
+            "coins stacked impossibly high defying gravity with small plant growing from top, whimsical metaphorical photography"
+        ],
+        "styles": ["artistic", "conceptual", "editorial"],
+        "moods": ["satisfying", "ambitious", "growth-focused"]
+    },
+    
+    "plant_money_metaphors": {
+        "themes": [
+            "tiny succulent growing from pile of gold coins in terracotta pot, growth metaphor, morning golden hour light",
+            "money tree with actual dollar bills as leaves in modern white ceramic pot, whimsical magical realism style",
+            "hand holding small plant with roots wrapped in dollar bills, ethereal dreamy photography, soft backlight",
+            "seedling sprouting from soil made of coins in mason jar, time-lapse concept, macro photography",
+            "monstera plant with gold painted leaves next to stack of cash, modern botanical aesthetic, bright natural light"
+        ],
+        "styles": ["botanical", "metaphorical", "instagram-worthy"],
+        "moods": ["hopeful", "nurturing", "growth-mindset"]
+    },
+    
+    "organized_budget_aesthetics": {
+        "themes": [
+            "perfectly organized cash envelopes in rainbow gradient with elegant calligraphy labels, overhead flat lay, bright even lighting",
+            "minimalist budget binder open showing colorful dividers and cash slots, aesthetic stationery setup, soft natural light",
+            "vintage wooden cash box with organized compartments filled with sorted bills and coins, nostalgic aesthetic, warm lighting",
+            "modern acrylic organizer with color-coded cash categories, clean minimalist workspace, scandinavian aesthetic",
+            "aesthetic bullet journal spread with cash envelopes and washi tape decoration, cozy desk setup, morning light"
+        ],
+        "styles": ["organized", "aesthetic", "studygram-inspired"],
+        "moods": ["satisfying", "motivating", "empowering"]
+    },
+    
+    "cash_lifestyle_goals": {
+        "themes": [
+            "stack of hundred dollar bills fanned out on white linen sheets with morning coffee and croissant, luxury morning aesthetic",
+            "cash spread across marble kitchen island with fresh flowers and laptop, girl boss aesthetic, bright airy photography",
+            "money arranged in heart shape on bed with rose petals, romantic wealth visualization, soft dreamy lighting",
+            "bills and coins arranged around open planner and iced coffee, productive aesthetic, bright desk setup",
+            "cash tucked into designer wallet on vanity with makeup and jewelry, getting-ready aesthetic, glamorous lighting"
+        ],
+        "styles": ["lifestyle", "relatable-luxury", "aspirational-everyday"],
+        "moods": ["inspiring", "achievable", "motivational"]
+    },
+    
+    "minimalist_money_shots": {
+        "themes": [
+            "single crisp bill perfectly centered on pure white background with dramatic shadow, minimalist editorial style",
+            "sleek black leather wallet with single gold credit card visible, luxury minimalism, hard dramatic lighting",
+            "geometric arrangement of bills and coins creating abstract pattern, modern art photography, high contrast",
+            "one perfect coin standing on edge with infinite white background, conceptual minimalism, studio lighting",
+            "folded bills creating architectural sculpture, minimalist still life, museum quality lighting"
+        ],
+        "styles": ["minimalist", "editorial", "art-photography"],
+        "moods": ["sophisticated", "modern", "clean"]
+    },
+    
+    "cozy_savings_moments": {
+        "themes": [
+            "hands counting cash at cozy coffee shop table with latte art visible, warm autumn aesthetic, soft natural light",
+            "piggy bank on window sill with rain drops and fairy lights, cozy evening aesthetic, bokeh lighting",
+            "cash envelope system spread on bed with chunky knit blanket, cozy bedroom aesthetic, warm golden light",
+            "vintage tin filled with savings on wooden kitchen table with fresh bread, cottagecore aesthetic, rustic lighting",
+            "girl writing in budget journal with cash nearby and candles lit, self care aesthetic, cozy evening ambiance"
+        ],
+        "styles": ["cozy", "lifestyle", "relatable"],
+        "moods": ["comforting", "attainable", "wholesome"]
+    }
+}
 
-jobs:
-  pinterest-diverse:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+# ULTRA ENHANCED visual variations
+visual_variations = {
+    'color_palettes': [
+        'soft blush pink with champagne gold and cream',
+        'sage green with natural wood and white marble',
+        'deep navy with rose gold and ivory',
+        'millennial pink with grey marble and brass',
+        'warm terracotta with olive green and beige',
+        'powder blue with silver and soft white',
+        'lavender with gold and pearl white',
+        'emerald green with gold leaf and cream',
+        'peachy coral with copper and linen white',
+        'dusty rose with antique gold and alabaster'
+    ],
+    
+    'lighting_styles': [
+        'golden hour warm glow streaming through sheer curtains',
+        'soft diffused morning light with slight haze',
+        'dramatic side lighting creating long elegant shadows',
+        'bright airy natural light with slight overexposure',
+        'moody chiaroscuro with spotlight effect',
+        'backlit with glowing rim light and bokeh',
+        'even studio lighting with soft shadows',
+        'sunset glow with warm orange tones',
+        'dreamy fairy lights creating magical bokeh',
+        'crisp daylight with perfect white balance'
+    ],
+    
+    'compositions': [
+        'rule of thirds with leading lines to focal point',
+        'perfectly centered symmetrical composition',
+        'dynamic diagonal arrangement creating movement',
+        'flat lay from directly above with geometric precision',
+        'slight overhead angle showing beautiful depth and layers',
+        'close-up macro showing intricate details',
+        'negative space emphasizing minimalism',
+        'frame within frame creating depth',
+        'golden ratio spiral composition',
+        'balanced asymmetry creating visual interest'
+    ],
+    
+    'textures': [
+        'smooth polished marble with natural veining',
+        'warm rustic reclaimed wood with character',
+        'soft luxury linen fabric with subtle wrinkles',
+        'pristine white backdrop with slight texture',
+        'natural stone with organic patterns',
+        'sleek modern concrete surface',
+        'plush velvet with rich depth',
+        'weathered vintage wood with patina',
+        'smooth ceramic with matte finish',
+        'brushed metal with subtle reflections'
+    ],
+    
+    'pinterest_boost_keywords': [
+        'pinterest aesthetic perfection',
+        'viral worthy composition',
+        'high engagement visual',
+        'scroll-stopping imagery',
+        'save-worthy content',
+        'repinnable masterpiece',
+        'trending aesthetic 2025',
+        'algorithm-friendly composition',
+        'maximum visual appeal',
+        'instant attention grabber'
+    ]
+}
 
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+# CRITICAL: Quality ve viral factors
+quality_enhancers = [
+    'professional editorial photography',
+    'ultra high resolution 8k sharp focus',
+    'magazine cover worthy quality',
+    'pinterest trending aesthetic',
+    'viral social media worthy',
+    'shot on expensive camera',
+    'professional color grading',
+    'perfect exposure and white balance',
+    'tack sharp focus throughout',
+    'studio photography quality'
+]
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+# TEXT OLMASIN garantisi
+no_text_enforcers = [
+    'absolutely no text visible anywhere',
+    'no words no letters no numbers',
+    'zero typography or text elements',
+    'no watermarks or branding',
+    'clean visual with no text overlay',
+    'pure imagery without any text'
+]
 
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests pillow urllib3
+def generate_viral_pinterest_prompt():
+    """
+    Pinterest algoritmasına optimize edilmiş, viral potential'ı yüksek prompt üretir
+    """
+    import random
+    
+    # Ana kategori seç
+    category = random.choice(list(mega_content_library.keys()))
+    content = mega_content_library[category]
+    
+    # Core elements
+    theme = random.choice(content['themes'])
+    style = random.choice(content['styles'])
+    mood = random.choice(content['moods'])
+    
+    # Visual enhancements
+    color = random.choice(visual_variations['color_palettes'])
+    lighting = random.choice(visual_variations['lighting_styles'])
+    composition = random.choice(visual_variations['compositions'])
+    texture = random.choice(visual_variations['textures'])
+    
+    # Quality boosters
+    quality = random.choice(quality_enhancers)
+    pinterest_boost = random.choice(visual_variations['pinterest_boost_keywords'])
+    no_text = random.choice(no_text_enforcers)
+    
+    # Format specifics
+    format_specs = "vertical pinterest format 2:3 ratio, optimized for mobile viewing"
+    
+    # MEGA PROMPT ASSEMBLY
+    prompt = f"{theme}, {color}, {lighting}, {composition}, {texture}, {style} style, {mood} mood, {quality}, {pinterest_boost}, {format_specs}, {no_text}"
+    
+    return prompt, category
 
-    - name: Create workspace for state
-      run: |
-        mkdir -p .pinterest_state
-
-    - name: Ultra Diverse Pinterest Content (script)
-      env:
-        IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
-        IFTTT_EVENT: ${{ secrets.IFTTT_EVENT }}
-        WEBSITE_URL: https://savetracker.site/
-        ACCOUNT_AGE_DAYS: 30
-        STATE_DIR: .pinterest_state
-      run: |
-        set -euo pipefail
-        python << 'PY'
-        # -*- coding: utf-8 -*-
-        """
-        Pinterest için optimize edilmiş, text'siz, yüksek kaliteli görsel promptları
-        Saving/tasarruf temasına odaklanmış
-        """
-        import os
-        import sys
-        import time
-        import json
-        import random
-        import hashlib
-        from datetime import datetime
-        import urllib.parse
-        import requests
-        from pathlib import Path
-        from requests.adapters import HTTPAdapter
-        from urllib3.util.retry import Retry
-
-        STATE_DIR = Path(os.environ.get('STATE_DIR', '.pinterest_state'))
-        STATE_DIR.mkdir(parents=True, exist_ok=True)
-        POSTED_FILE = STATE_DIR / 'posted.json'
-
-        def load_posted():
-            if POSTED_FILE.exists():
-                try:
-                    return set(json.loads(POSTED_FILE.read_text()))
-                except Exception:
-                    return set()
-            return set()
-
-        def save_posted(posted_set):
-            try:
-                POSTED_FILE.write_text(json.dumps(list(posted_set)))
-            except Exception as e:
-                print(f"⚠️ State save failed: {e}")
-
-        def create_session(retries=3, backoff_factor=0.6, status_forcelist=(500,502,503,504)):
-            s = requests.Session()
-            retry = Retry(
-                total=retries,
-                read=retries,
-                connect=retries,
-                backoff_factor=backoff_factor,
-                status_forcelist=status_forcelist,
-                allowed_methods=["GET","POST"]
-            )
-            adapter = HTTPAdapter(max_retries=retry)
-            s.mount('https://', adapter)
-            s.mount('http://', adapter)
-            s.headers.update({'User-Agent': 'adv-pinterest-engine/1.0'})
-            return s
-
-        session = create_session()
-
-        IFTTT_KEY = os.environ.get('IFTTT_KEY')
-        IFTTT_EVENT = os.environ.get('IFTTT_EVENT') or 'pinterest_paylas'
-        WEBSITE_URL = os.environ.get('WEBSITE_URL', '').strip()
-
-        if not IFTTT_KEY:
-            print('❌ IFTTT_KEY eksik. Lütfen secrets.IFTTT_KEY ekleyin.')
-            sys.exit(2)
-
-        if not WEBSITE_URL:
-            print('⚠️ WEBSITE_URL yok. Devam ediyoruz ama description içinde link olmayacak.')
-
-        def calculate_safe_pin_count():
-            account_age = int(os.environ.get('ACCOUNT_AGE_DAYS', 1))
-            if account_age < 7:
-                max_daily_pins = 2
-            elif account_age < 14:
-                max_daily_pins = 4
-            elif account_age < 30:
-                max_daily_pins = 8
-            elif account_age < 60:
-                max_daily_pins = 12
-            elif account_age < 90:
-                max_daily_pins = 15
-            else:
-                max_daily_pins = 20
-
-            pins_today = random.randint(0, max(0, max_daily_pins - 5))
-            remaining_pins = max_daily_pins - pins_today
-            if remaining_pins <= 0:
-                return 0
-            pins_this_run = min(remaining_pins, random.randint(1, 3))
-            return pins_this_run
-
-        # YENİ: Pinterest'te viral olan, text'siz, kaliteli görsel promptları
-        mega_content_library = {
-            "piggy_bank_aesthetic": {
-                "themes": [
-                    "ceramic piggy bank surrounded by gold coins on marble surface",
-                    "pink ceramic piggy bank with scattered coins in soft natural light",
-                    "vintage glass jar filled with coins and dollar bills",
-                    "elegant piggy bank on wooden desk with green plants",
-                    "modern white piggy bank with eucalyptus leaves decoration"
-                ],
-                "styles": ["minimalist", "aesthetic", "cozy"],
-                "moods": ["calm", "hopeful", "inspiring"]
-            },
-            "money_jar_goals": {
-                "themes": [
-                    "mason jar filled with rolled money and coins with soft bokeh background",
-                    "glass savings jar overflowing with paper money on rustic wooden table",
-                    "transparent jar with coins stacked inside on white background",
-                    "vintage savings jar with ribbon tied around neck filled with cash",
-                    "multiple glass jars with different amounts of money on shelf"
-                ],
-                "styles": ["rustic", "clean", "organic"],
-                "moods": ["motivating", "positive", "warm"]
-            },
-            "coin_stacking_wealth": {
-                "themes": [
-                    "perfectly stacked coins creating ascending towers on dark surface",
-                    "gold and silver coins arranged in growing stacks",
-                    "coins stacked in pyramid formation with blurred background",
-                    "ascending coin stacks with plant growing from top stack",
-                    "multiple coin towers of different heights on marble surface"
-                ],
-                "styles": ["elegant", "professional", "symbolic"],
-                "moods": ["ambitious", "determined", "focused"]
-            },
-            "wallet_minimalism": {
-                "themes": [
-                    "sleek leather wallet with cash peeking out on clean background",
-                    "minimalist wallet with credit cards on marble table",
-                    "open wallet showing organized bills and cards flat lay",
-                    "brown leather wallet with green plant leaves beside it",
-                    "modern minimalist wallet on white surface with shadow"
-                ],
-                "styles": ["minimalist", "modern", "clean"],
-                "moods": ["organized", "sophisticated", "simple"]
-            },
-            "cash_envelope_system": {
-                "themes": [
-                    "pastel colored envelopes with cash visible inside arranged neatly",
-                    "kraft paper envelopes filled with money in organized row",
-                    "white envelopes with different amounts of cash on wooden surface",
-                    "colorful labeled envelopes for budget categories flat lay",
-                    "vintage style envelopes with money on marble countertop"
-                ],
-                "styles": ["organized", "aesthetic", "practical"],
-                "moods": ["systematic", "neat", "empowering"]
-            },
-            "plant_growth_metaphor": {
-                "themes": [
-                    "small plant growing from pile of coins in sunlight",
-                    "money tree with coins as leaves in modern pot",
-                    "succulent plant in pot surrounded by scattered coins",
-                    "young plant sprouting with coins buried in soil",
-                    "green plant growing through stack of money bills"
-                ],
-                "styles": ["symbolic", "natural", "hopeful"],
-                "moods": ["growth-focused", "optimistic", "inspiring"]
-            },
-            "luxury_lifestyle_goals": {
-                "themes": [
-                    "champagne glass with gold coins on marble surface",
-                    "luxury watch on velvet cushion with soft lighting",
-                    "designer handbag with jewelry on elegant vanity",
-                    "keys to luxury car on marble table with flowers",
-                    "passport with international currency and travel items"
-                ],
-                "styles": ["luxurious", "aspirational", "elegant"],
-                "moods": ["dreamy", "motivating", "sophisticated"]
-            },
-            "financial_flat_lay": {
-                "themes": [
-                    "flat lay of cash, calculator, and coffee cup on white background",
-                    "money, phone, and minimal accessories arranged aesthetically",
-                    "bills and coins arranged in circular pattern from above",
-                    "cash spread out with gold accessories on marble surface",
-                    "money with fresh flowers and jewelry organized flat lay"
-                ],
-                "styles": ["aesthetic", "organized", "modern"],
-                "moods": ["inspiring", "clean", "focused"]
-            }
-        }
-
-        visual_variations = {
-            'color_palettes': [
-                'soft pastels with cream and white',
-                'warm earth tones with beige and brown',
-                'minimalist white with gold accents',
-                'sage green with natural wood tones',
-                'blush pink with marble and gold',
-                'navy blue with silver accents',
-                'neutral grays with pops of green'
-            ],
-            'lighting_styles': [
-                'soft natural window light from left',
-                'golden hour warm glow',
-                'bright even daylight',
-                'soft diffused overhead lighting',
-                'dramatic side lighting with shadows',
-                'backlit with gentle rim light'
-            ],
-            'compositions': [
-                'centered symmetrical layout',
-                'rule of thirds balanced composition',
-                'flat lay from directly above',
-                'slight overhead angle showing depth',
-                'diagonal arrangement creating movement'
-            ],
-            'textures': [
-                'smooth marble surface',
-                'rustic wooden table',
-                'soft linen fabric background',
-                'clean white backdrop',
-                'natural stone texture'
-            ]
-        }
-
-        def generate_unique_prompt():
-            category = random.choice(list(mega_content_library.keys()))
-            content = mega_content_library[category]
-            theme = random.choice(content['themes'])
-            color = random.choice(visual_variations['color_palettes'])
-            lighting = random.choice(visual_variations['lighting_styles'])
-            composition = random.choice(visual_variations['compositions'])
-            texture = random.choice(visual_variations['textures'])
-            style = random.choice(content['styles'])
-            mood = random.choice(content['moods'])
-            
-            quality_boosters = [
-                'professional photography',
-                'high resolution 8k',
-                'sharp focus',
-                'studio quality',
-                'pinterest aesthetic'
-            ]
-            
-            # TEXT OLMASIN diye özel vurgu
-            prompt = f"{theme}, {color}, {lighting}, {composition}, {texture}, {style} style, {mood} mood, {random.choice(quality_boosters)}, no text, no words, no letters, no numbers visible, no watermarks, vertical pinterest format, clean aesthetic"
-            
-            return prompt, category
-
-        def generate_unique_content(category):
-            # Çeşitli başlıklar
-            titles = [
-                "Money Saving Tip 💰",
-                "Financial Freedom ✨",
-                "Savings Goal 🎯",
-                "Smart Money 💡",
-                "Budget Goals 🌟",
-                "Wealth Building 📈",
-                "Save Money 💚",
-                "Financial Wellness ☘️",
-                "Money Matters 💵",
-                "Financial Success 🏆",
-                "Saving Strategy 🧠",
-                "Money Management 📊"
-            ]
-            
-            # Daha uzun ve çeşitli açıklamalar
-            intros = [
-                "💭 Quick tip:",
-                "✨ Did you know?",
-                "🎯 Pro tip:",
-                "💡 Money wisdom:",
-                "🌟 Remember:",
-                "📈 Success tip:",
-                "💚 Daily reminder:",
-                "⚡ Financial hack:"
-            ]
-            
-            bodies = [
-                "Every small amount you save today builds your financial security for tomorrow.",
-                "Consistency in saving beats perfection every single time - start with what you can.",
-                "Your savings account isn't just money, it's your peace of mind and future opportunities.",
-                "The secret to building wealth? Small daily habits that compound over time.",
-                "Saving money isn't about restriction, it's about creating the life you want.",
-                "Financial freedom starts with the decision to save even when it feels small.",
-                "Every dollar saved is a vote for your future self and your dreams.",
-                "Building wealth is a marathon, not a sprint - celebrate every small win.",
-                "Your financial journey is unique - compare yourself only to your past self.",
-                "Smart money management today creates endless possibilities tomorrow.",
-                "Saving is self-care for your future - you deserve financial stability.",
-                "Small sacrifices today lead to big celebrations in your future."
-            ]
-            
-            ctas = [
-                "What's your savings goal?",
-                "Start your journey today!",
-                "Double tap if saving!",
-                "Share this with a friend",
-                "Follow for more tips",
-                "Comment your goal below",
-                "Save this for later",
-                "Tag someone who needs this"
-            ]
-            
-            hashtags_list = [
-                "#moneysavingtips #financialfreedom #budgeting #personalfinance",
-                "#savingmoney #financialliteracy #moneygoals #wealthbuilding",
-                "#financetips #moneymindset #savingsgoals #smartmoney",
-                "#budgetingtips #financialwellness #moneytips #savingsplan",
-                "#moneymanagement #financialsuccess #savingsmotivation #moneymatters",
-                "#financialindependence #moneysaver #budgetlife #wealthmindset"
-            ]
-            
-            title = random.choice(titles)
-            intro = random.choice(intros)
-            body = random.choice(bodies)
-            cta = random.choice(ctas)
-            hashtags = random.choice(hashtags_list)
-            
-            # Uzun description (link + hashtag dahil)
-            description = f"{intro} {body} {cta}\n\n💻 More tips: {WEBSITE_URL}\n\n{hashtags}"
-            
-            return title, description
-
-        def create_diverse_image(prompt):
-            encoded = urllib.parse.quote(prompt)
-            timestamp = int(datetime.now().timestamp() * 1000)
-            
-            # ÇOK DAHA FAZLA rastgelelik için:
-            random_component = random.randint(100000, 999999999)
-            noise_factor = random.randint(1, 1000000)
-            micro_timestamp = int(datetime.now().microsecond)
-            
-            prompt_hash = abs(hash(prompt + str(random_component)))
-            
-            # Mega seed kombinasyonu - her çalıştırmada farklı
-            super_seed = (timestamp * random_component + noise_factor + micro_timestamp + prompt_hash) % 2147483647
-            
-            # Daha fazla boyut çeşitliliği
-            size = random.choice([
-                (1000, 1500), (1080, 1620), (1000, 1400),
-                (1080, 1350), (1000, 1600), (1200, 1800),
-                (800, 1200), (900, 1350), (1000, 1250)
-            ])
-            
-            # Model parametresi ile (nano-banana yerine flux veya turbo)
-            model = random.choice(['flux', 'flux-realism', 'flux-anime', 'flux-3d'])
-            
-            image_url = f"https://image.pollinations.ai/prompt/{encoded}?width={size[0]}&height={size[1]}&seed={super_seed}&nologo=true&enhance=true&model={model}"
-            
-            return image_url, super_seed
-
-        def send_to_pinterest(image_url, title, description):
-            event_name = IFTTT_EVENT
-            ifttt_url = f"https://maker.ifttt.com/trigger/{event_name}/with/key/{IFTTT_KEY}"
-            # IFTTT Pinterest mapping:
-            # Value1 = Image URL
-            # Value2 = Title
-            # Value3 = Description
-            payload = {
-                "value1": image_url,      # Image URL
-                "value2": title,          # Title (kısa başlık)
-                "value3": description     # Description (uzun açıklama + link + hashtag)
-            }
-            
-            for attempt in range(4):
-                try:
-                    r = session.post(ifttt_url, json=payload, timeout=20)
-                    if r.status_code == 200:
-                        return True
-                    text = (r.text or '').lower()
-                    if 'limit' in text or r.status_code in (429, 503):
-                        sleep = (2 ** attempt) + random.random()
-                        print(f"⚠️ IFTTT rate or service issue (status {r.status_code}). Backing off {sleep:.1f}s")
-                        time.sleep(sleep)
-                        continue
-                    print(f"❌ IFTTT HTTP {r.status_code}: {r.text[:200]}")
-                    return False
-                except requests.RequestException as e:
-                    sleep = (2 ** attempt) + random.random()
-                    print(f"⚠️ Network error -> {e}. Retrying in {sleep:.1f}s")
-                    time.sleep(sleep)
-            return False
-
-        def log_pin(entry):
-            LOG_FILE = STATE_DIR / 'run.log'
-            try:
-                LOG_FILE.write_text((LOG_FILE.read_text() if LOG_FILE.exists() else '') + json.dumps(entry) + '\n')
-            except Exception:
-                pass
-
-        def smart_posting_system():
-            posted = load_posted()
-            pins_to_post = calculate_safe_pin_count()
-            if pins_to_post == 0:
-                print('📌 Bugünlük limit dolu veya 0 pin. Çıkılıyor.')
-                return
-            print(f"🎯 Bu çalıştırmada paylaşılacak pin sayısı: {pins_to_post}")
-            
-            for i in range(pins_to_post):
-                if i > 0:
-                    wait_time = random.uniform(3, 12)
-                    print(f"⏳ {wait_time:.1f}s bekleniyor")
-                    time.sleep(wait_time)
-                
-                attempt = 0
-                prompt = None
-                while attempt < 8:
-                    prompt, category = generate_unique_prompt()
-                    checksum = str(abs(hash(prompt)))
-                    if checksum not in posted:
-                        posted.add(checksum)
-                        break
-                    attempt += 1
-                
-                if not prompt:
-                    print('🔁 Benzersiz prompt bulunamadı, atlanıyor.')
-                    continue
-                
-                print(f"📂 Kategori: {category} | Prompt checksum: {checksum[:8]}")
-                image_url, seed = create_diverse_image(prompt)
-                title, description = generate_unique_content(category)
-                
-                success = send_to_pinterest(image_url, title, description)
-                entry = {"timestamp": datetime.now().isoformat(), "category": category, "seed": seed, "success": success}
-                log_pin(entry)
-                
-                print(f"✅ Pin {'başarılı' if success else 'başarısız'}: {title}")
-            
-            save_posted(posted)
-
-        def main():
-            print('=== PINTEREST SAVINGS CONTENT ENGINE ===')
-            print(datetime.now().isoformat())
-            smart_posting_system()
-            print('=== İŞLEM TAMAMLANDI ===')
-
-        if __name__ == '__main__':
-            main()
-        PY
-
-    - name: Upload logs & state as artifact
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: pinterest-state-and-logs
-        path: .pinterest_state
-
-    - name: Summary Report
-      if: success()
-      run: |
-        echo "================================"
-        echo "📊 PINTEREST AUTOMATION REPORT"
-        echo "================================"
-        echo "✅ Görev tamamlandı"
-        echo "💰 Tasarruf temalı içerikler oluşturuldu"
-        echo "🎨 Text'siz, kaliteli görseller"
-        echo "📈 Hesap sağlığı korunuyor"
-        echo "================================"
-
-    - name: Failure report
-      if: failure()
-      run: |
-        echo "================================"
-        echo "❌ PINTEREST AUTOMATION FAILURE"
-        echo "Check artifacts: pinterest-state-and-logs"
-        echo "================================"
+# Örnek kullanım
+if __name__ == "__main__":
+    print("🎨 PINTEREST VIRAL PROMPT ÖRNEKLERİ:\n")
+    for i in range(5):
+        prompt, category = generate_viral_pinterest_prompt()
+        print(f"{i+1}. Kategori: {category}")
+        print(f"   Prompt: {prompt}\n")
