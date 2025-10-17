@@ -3,10 +3,10 @@ name: Advanced Pinterest Diversity Engine (Viral Text Version)
 on:
   schedule:
     # Cron zamanları GitHub Actions için UTC'dir. Aşağıdaki yorumlar Istanbul (+03:00) saatine göre verilmiştir.
-    - cron: '0 8 * * *'   # 11:00 (sabah gönderisi)
-    - cron: '0 15 * * *'  # 18:00 (akşam gönderisi)
-    - cron: '8 11 * * 5'     # Cuma 14:08
-    - cron: '35 16 * * 6'    # Cumartesi 19:35
+    - cron: '0 8 * * *'    # Her gün 08:00'de
+    - cron: '0 12 * * *'   # Her gün 12:00'de
+    - cron: '0 16 * * *'   # Her gün 16:00'de
+    - cron: '0 20 * * *'   # Her gün 20:00'de
   workflow_dispatch:
   push:
     branches: [ main ]
